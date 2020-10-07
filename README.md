@@ -1,4 +1,4 @@
-# Authorship Attribution (Russian texts)
+# ATAURUS (Attribution of Authorship Russian)
 
 The repository for recognizing the author of russian texts or articles.
 
