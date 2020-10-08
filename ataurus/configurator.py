@@ -4,12 +4,14 @@ Also module implements a class containing information about the project and all 
 will be printed in the command line.
 """
 
+import re
 import argparse
+import pandas as pd
 
 
 class Configurator:
     NAME = 'Ataurus'
-    DESCRIPTION = 'Ataurus = Attribution of Authorship Russian\n' \
+    DESCRIPTION = 'Ataurus = Attribution of Authorship Russian. ' \
                   'This program collects data from the sites(optional), processes this data, ' \
                   'gets the parameter vector from the data and trains the model of machine learning to specify ' \
                   'the author of an unknown text.'
@@ -33,8 +35,8 @@ class Configurator:
         parser = argparse.ArgumentParser(prog=program_name, description=description, epilog=epilog)
 
         parser.add_argument('input',
-                            help='the input file in the JSON format',
-                            type=argparse.FileType(mode='r'))
+                            help='the input file in the CSV format',
+                            type=argparse.FileType(mode='r', encoding='utf-8'))
 
         return parser
 
@@ -47,3 +49,16 @@ class Configurator:
         parameters = self._parser.parse_args(args)
         return parameters
 
+    @property
+    def data(self) -> pd.DataFrame:
+        file = self._parameters.input
+        # The input file must be csv format because of it will provide safe operations with data
+        if not re.search(r'\.csv$', file.name):
+            raise ValueError("The input file isn't csv format")
+
+        try:
+            it = pd.read_csv(file)
+        except UnicodeDecodeError as e:
+            raise ValueError("Data in the input file isn't UTF-8 encoding")
+
+        return it
