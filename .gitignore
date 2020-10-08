@@ -130,3 +130,6 @@ dmypy.json
 
 # PyCharm repository
 .idea
+
+# The tempopary directory
+temp
