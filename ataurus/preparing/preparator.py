@@ -4,6 +4,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 """
 
 import pandas as pd
+import numpy as np
 
 
 class Preparator:
@@ -12,6 +13,11 @@ class Preparator:
             raise TypeError("The data isn't instance of pd.DataFrame")
         self._data = data
         self._tokens = None
+
+        try:
+            self._texts = self.data['text'].to_numpy()
+        except KeyError:
+            raise KeyError("The input data in .csv format hasn't 'text' column, please fix your file")
 
     @property
     def data(self):
