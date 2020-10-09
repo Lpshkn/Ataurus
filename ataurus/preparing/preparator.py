@@ -10,3 +10,19 @@ class Preparator:
     def __init__(self, data: pd.DataFrame):
         if not isinstance(data, pd.DataFrame):
             raise TypeError("The data isn't instance of pd.DataFrame")
+        self._data = data
+        self._tokens = None
+
+    @property
+    def data(self):
+        """
+        It's unprocessed data, necessary if a programmer will want to process the source data himself.
+        """
+        return self._data
+
+    @property
+    def tokens(self):
+        if self._tokens is None:
+            raise ValueError("Attempt to get tokens from unprocessed data")
+        return self._tokens
+
