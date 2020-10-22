@@ -4,7 +4,8 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 """
 
 import pandas as pd
-import numpy as np
+import re
+from razdel import tokenize, sentenize
 
 
 class Preparator:
@@ -12,7 +13,6 @@ class Preparator:
         if not isinstance(data, pd.DataFrame):
             raise TypeError("The data isn't instance of pd.DataFrame")
         self._data = data
-        self._tokens = None
 
         try:
             self._texts = self.data['text'].to_numpy()
@@ -26,9 +26,26 @@ class Preparator:
         """
         return self._data
 
-    @property
-    def tokens(self):
-        if self._tokens is None:
-            raise ValueError("Attempt to get tokens from unprocessed data")
-        return self._tokens
+    def tokens(self, index: int, lower=True, delete_punctuations=True) -> list:
+        """
+        Get a list of tokens from the text received by the index from the DataFrame.
 
+        :param index: index of a text of the DataFrame that you want to process
+        :param lower: to lower a result
+        :param delete_punctuations: delete all punctuations from a result
+        :return: list - the list of tokens
+        """
+        text = self._texts[index]
+        if not isinstance(text, str):
+            raise TypeError("Text value is not string")
+
+        if lower:
+            text = text.lower()
+
+        text = re.sub(r'[\s]+', r' ', text).strip()
+
+        if delete_punctuations:
+            tokens = [token.text for token in tokenize(text) if token not in r".,?!-\";:()—«»{}[]/\'\\"]
+        else:
+            tokens = [token.text for token in tokenize(text)]
+        return tokens
