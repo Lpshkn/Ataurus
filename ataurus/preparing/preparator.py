@@ -6,6 +6,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 import pandas as pd
 import re
 from razdel import tokenize, sentenize
+from .rules import PUNCTUATIONS
 
 
 class Preparator:
@@ -45,7 +46,7 @@ class Preparator:
         text = re.sub(r'[\s]+', r' ', text).strip()
 
         if delete_punctuations:
-            tokens = [token.text for token in tokenize(text) if token not in r".,?!-\";:()—«»{}[]/\'\\"]
+            tokens = [token.text for token in tokenize(text) if not PUNCTUATIONS.search(token.text)]
         else:
             tokens = [token.text for token in tokenize(text)]
         return tokens
@@ -69,6 +70,6 @@ class Preparator:
             sentences = [sentence.text for sentence in sentenize(text)]
 
         if delete_punctuations:
-            sentences = [re.sub(r"[.,?!-\";:()—«»{}[]/\'\\]+", " ", sentence) for sentence in sentences]
+            sentences = [PUNCTUATIONS.sub(" ", sentence) for sentence in sentences]
 
         return sentences
