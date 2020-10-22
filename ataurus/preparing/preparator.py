@@ -49,3 +49,26 @@ class Preparator:
         else:
             tokens = [token.text for token in tokenize(text)]
         return tokens
+
+    def sentences(self, index: int, lower=False, delete_punctuations=True) -> list:
+        """
+        Get a list of sentences from the text received by the index from the DataFrame.
+
+        :param index: index of a text of the DataFrame that you want to process
+        :param lower: to lower a result
+        :param delete_punctuations: delete all punctuations from a result
+        :return: list - the list of sentences
+        """
+        text = self._texts[index]
+        if not isinstance(text, str):
+            raise TypeError("Text value is not string")
+
+        if lower:
+            sentences = [sentence.text.lower() for sentence in sentenize(text)]
+        else:
+            sentences = [sentence.text for sentence in sentenize(text)]
+
+        if delete_punctuations:
+            sentences = [re.sub(r"[.,?!-\";:()—«»{}[]/\'\\]+", " ", sentence) for sentence in sentences]
+
+        return sentences
