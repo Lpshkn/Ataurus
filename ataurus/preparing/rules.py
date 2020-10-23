@@ -17,5 +17,5 @@ DOMAINS = "(com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|mu
          "|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si" \
          "|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug" \
          "|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)"
-URLS = re.compile(r"(https?://[^\s]+)|(www\.[^\s]+)|([\wа-яА-Я]+\.{})".format(DOMENS), re.IGNORECASE)
+URLS = re.compile(r"(https?://[^\s]+)|(www\.[^\s]+)|([\wа-яА-Я]+\.{})".format(DOMAINS), re.IGNORECASE)
 
