@@ -6,7 +6,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 import pandas as pd
 import re
 from razdel import tokenize, sentenize
-from .rules import PUNCTUATIONS
+from .rules import PUNCTUATIONS, URLS
 
 
 class Preparator:
@@ -27,7 +27,10 @@ class Preparator:
         """
         return self._data
 
-    def tokens(self, index: int, lower=True, delete_punctuations=True) -> list:
+    def tokens(self,
+               index: int,
+               lower=True,
+               delete_punctuations=True) -> list:
         """
         Get a list of tokens from the text received by the index from the DataFrame.
 
@@ -36,14 +39,7 @@ class Preparator:
         :param delete_punctuations: delete all punctuations from a result
         :return: list - the list of tokens
         """
-        text = self._texts[index]
-        if not isinstance(text, str):
-            raise TypeError("Text value is not string")
-
-        if lower:
-            text = text.lower()
-
-        text = re.sub(r'[\s]+', r' ', text).strip()
+        text = self._process_text(index, lower=lower, delete_whitespace=True, delete_urls=True)
 
         if delete_punctuations:
             tokens = [token.text for token in tokenize(text) if not PUNCTUATIONS.search(token.text)]
@@ -51,7 +47,10 @@ class Preparator:
             tokens = [token.text for token in tokenize(text)]
         return tokens
 
-    def sentences(self, index: int, lower=False, delete_punctuations=True) -> list:
+    def sentences(self,
+                  index: int,
+                  lower=False,
+                  delete_punctuations=True) -> list:
         """
         Get a list of sentences from the text received by the index from the DataFrame.
 
@@ -60,9 +59,7 @@ class Preparator:
         :param delete_punctuations: delete all punctuations from a result
         :return: list - the list of sentences
         """
-        text = self._texts[index]
-        if not isinstance(text, str):
-            raise TypeError("Text value is not string")
+        text = self._process_text(index, lower=False, delete_whitespace=False, delete_urls=True)
 
         if lower:
             sentences = [sentence.text.lower() for sentence in sentenize(text)]
@@ -73,3 +70,29 @@ class Preparator:
             sentences = [PUNCTUATIONS.sub(" ", sentence) for sentence in sentences]
 
         return sentences
+
+    def _process_text(self,
+                      index: int,
+                      lower=True,
+                      delete_whitespace=True,
+                      delete_urls=True) -> str:
+        """
+        Process the text depending on specified options.
+
+        :param index: index of a text of the DataFrame that you want to process
+        :param lower: to lower a result
+        :param delete_whitespace: remove redundant whitespaces
+        :param delete_urls: remove all url links
+        :return: str - processed text
+        """
+        text = self._texts[index]
+        if not isinstance(text, str):
+            raise TypeError("Text value is not string")
+
+        if lower:
+            text = text.lower()
+        if delete_whitespace:
+            text = re.sub(r'[\s]+', r' ', text).strip()
+        if delete_urls:
+            text = URLS.sub('', text)
+        return text
