@@ -28,48 +28,72 @@ class Preparator:
         return self._data
 
     def tokens(self,
-               index: int,
+               index: int = None,
                lower=True,
                delete_punctuations=True) -> list:
         """
         Get a list of tokens from the text received by the index from the DataFrame.
 
-        :param index: index of a text of the DataFrame that you want to process
+        :param index: index of a text of the DataFrame that you want to process.
+                      If it's None, all the texts will be processed
         :param lower: to lower a result
         :param delete_punctuations: delete all punctuations from a result
         :return: list - the list of tokens
         """
-        text = self._process_text(index, lower=lower, delete_whitespace=True, delete_urls=True)
-
-        if delete_punctuations:
-            tokens = [token.text for token in tokenize(text) if not PUNCTUATIONS.search(token.text)]
+        results = []
+        if index is None:
+            index = range(len(self._texts))
         else:
-            tokens = [token.text for token in tokenize(text)]
-        return tokens
+            if not isinstance(index, int):
+                raise TypeError("The index that you want to use to get a text isn't int!")
+            index = [index]
+
+        for i in index:
+            text = self._process_text(i, lower=lower, delete_whitespace=True, delete_urls=True)
+
+            if delete_punctuations:
+                tokens = [token.text for token in tokenize(text) if not PUNCTUATIONS.search(token.text)]
+            else:
+                tokens = [token.text for token in tokenize(text)]
+            results.append(tokens)
+
+        return results
 
     def sentences(self,
-                  index: int,
+                  index: int = None,
                   lower=False,
-                  delete_punctuations=True) -> list:
+                  delete_punctuations=False) -> list:
         """
         Get a list of sentences from the text received by the index from the DataFrame.
 
-        :param index: index of a text of the DataFrame that you want to process
+        :param index: index of a text of the DataFrame that you want to process.
+                      If it's None, all the texts will be processed.
         :param lower: to lower a result
         :param delete_punctuations: delete all punctuations from a result
         :return: list - the list of sentences
         """
-        text = self._process_text(index, lower=False, delete_whitespace=False, delete_urls=True)
-
-        if lower:
-            sentences = [sentence.text.lower() for sentence in sentenize(text)]
+        results = []
+        if index is None:
+            index = range(len(self._texts))
         else:
-            sentences = [sentence.text for sentence in sentenize(text)]
+            if not isinstance(index, int):
+                raise TypeError("The index that you want to use to get a text isn't int!")
+            index = [index]
 
-        if delete_punctuations:
-            sentences = [PUNCTUATIONS.sub(" ", sentence) for sentence in sentences]
+        for i in index:
+            text = self._process_text(i, lower=False, delete_whitespace=False, delete_urls=True)
 
-        return sentences
+            if lower:
+                sentences = [sentence.text.lower() for sentence in sentenize(text)]
+            else:
+                sentences = [sentence.text for sentence in sentenize(text)]
+
+            if delete_punctuations:
+                sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence)).strip() for sentence in sentences]
+
+            results.append(sentences)
+
+        return results
 
     def _process_text(self,
                       index: int,
