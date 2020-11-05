@@ -1,8 +1,12 @@
-FROM snakepacker/python:3.7 as ataurus
+FROM ubuntu
 MAINTAINER lpshkn
+
+RUN apt-get update && apt-get install -y python3 \
+    && apt-get install -y python3-setuptools \
+    && apt-get install -y python3-pip
+
 COPY . /Ataurus
 WORKDIR /Ataurus
 
-RUN pip install -U pip && pip install -Ur requirements.txt
-RUN python3 setup.py test && python3 setup.py install
-ENTRYPOINT ["Ataurus"]
+RUN pip3 install -r requirements.txt && python3 setup.py test
+ENTRYPOINT ["python3", "./ataurus/main.py"]
