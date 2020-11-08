@@ -4,16 +4,16 @@ from preparing.preparator import Preparator
 
 
 def main():
-    try:
-        configurator = cfg.Configurator(sys.argv[1:])
-        preparator = Preparator(configurator.data)
+    configurator = cfg.Configurator(sys.argv[1:])
+    preparator = Preparator(configurator.data)
 
-        tokens = preparator.tokens()
-        print("Tokens: ", tokens)
-        sentences = preparator.sentences()
-        print("Sentences: ", sentences)
-    except Exception as e:
-        print('Error:', e, file=sys.stderr)
+    tokens = preparator.tokens()
+    for _tokens in tokens:
+        print("Tokens:\n", "\n".join(_tokens))
+    print('-'*100)
+    sentences = preparator.sentences()
+    for _sentences in sentences:
+        print("Sentences:\n", "\n".join(_sentences))
 
 
 if __name__ == '__main__':
