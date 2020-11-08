@@ -34,9 +34,13 @@ class Configurator:
         """
         parser = argparse.ArgumentParser(prog=program_name, description=description, epilog=epilog)
 
-        parser.add_argument('input',
-                            help='the input file in the CSV format',
+        parser.add_argument('-f', '--file',
+                            help='the input file in the CSV format, this option has bigger priority than -i option',
                             type=argparse.FileType(mode='r', encoding='utf-8'))
+
+        parser.add_argument('-i', '--input',
+                            help='the input string',
+                            type=str)
 
         return parser
 
@@ -47,18 +51,30 @@ class Configurator:
         :return: parsed arguments
         """
         parameters = self._parser.parse_args(args)
+
+        # At least one of the parameters must be specified
+        if not (parameters.file or parameters.input):
+            self._parser.error('No data was passed, add -f/--file to pass a csv file or -i/--input to pass a string')
+
         return parameters
 
     @property
     def data(self) -> pd.DataFrame:
-        file = self._parameters.input
-        # The input file must be csv format because of it will provide safe operations with data
-        if not re.search(r'\.csv$', file.name):
-            raise ValueError("The input file isn't csv format")
+        df = None
+        if self._parameters.file:
+            file = self._parameters.file
+            # The input file must be csv format because of it will provide safe operations with data
+            if not re.search(r'\.csv$', file.name):
+                file.close()
+                raise ValueError("The input file isn't csv format")
 
-        try:
-            it = pd.read_csv(file)
-        except UnicodeDecodeError as e:
-            raise ValueError("Data in the input file isn't UTF-8 encoding")
+            try:
+                df = pd.read_csv(file)
+            except UnicodeDecodeError:
+                file.close()
+                raise ValueError("Data in the input file isn't UTF-8 encoding")
+        elif self._parameters.input:
+            input_string = self._parameters.input
+            df = pd.DataFrame([input_string], columns=['text'])
 
-        return it
+        return df

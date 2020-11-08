@@ -27,28 +27,27 @@ class ConfiguratorTest(unittest.TestCase):
 
     @unittest.mock.patch('sys.stderr', open(os.devnull, 'w'))
     def test_incorrect_args(self):
-        args = ['-i' 'incorrect']
+        args = ['-g' 'incorrect']
         with self.assertRaises(SystemExit):
             cfg.Configurator(args)
 
     @unittest.mock.patch('sys.stderr', open(os.devnull, 'w'))
     def test_incorrect_input_file(self):
-        args = ['file']
+        args = ['-f', 'file']
         with self.assertRaises(SystemExit):
             configurator = cfg.Configurator(args)
 
     def test_existed_file(self):
-        args = [self.incorrect_file]
+        args = ['-f', self.incorrect_file]
         configurator = cfg.Configurator(args)
-        parameters = configurator._get_parameters(args)
 
     def test_file_extension(self):
-        args = [self.incorrect_file]
+        args = ['-f', self.incorrect_file]
         configurator = cfg.Configurator(args)
         with self.assertRaises(ValueError):
             data = configurator.data
 
     def test_correct_file(self):
-        args = [self.correct_file]
+        args = ['-f', self.correct_file]
         configurator = cfg.Configurator(args)
         data = configurator.data
