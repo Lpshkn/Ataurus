@@ -42,6 +42,7 @@ class FeaturesExtractor:
             raise ValueError("No features were extracted during fitting of FeaturesExtractor")
 
         self._features = pd.DataFrame(all_features)
+        self._features['author'] = self._preparator.authors
 
     @property
     def features(self) -> pd.DataFrame:

@@ -20,6 +20,7 @@ class Preparator:
         if not ('text' in self._data):
             raise KeyError("The input data in .csv format hasn't 'text' column, please fix your file")
 
+        self._authors = self.data['author'].values
         self._texts = self.data['text'].to_numpy()
 
     @property
@@ -28,6 +29,10 @@ class Preparator:
         It's unprocessed data, necessary if a programmer will want to process the source data himself.
         """
         return self._data
+
+    @property
+    def authors(self):
+        return self._authors
 
     def tokens(self,
                index: int = None,
