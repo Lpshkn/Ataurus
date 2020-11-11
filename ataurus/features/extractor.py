@@ -11,6 +11,8 @@ class FeaturesExtractor:
 
         self._preparator = preparator
         self._features = None
+        self._tokens = None
+        self._sentences = None
 
     def fit(self):
         pass
@@ -18,3 +20,11 @@ class FeaturesExtractor:
     @property
     def features(self):
         return self._features
+
+    @staticmethod
+    def _avg_len_words(tokens: list):
+        return sum(len(token) for token in tokens) / len(tokens)
+
+    @staticmethod
+    def _avg_len_sentences(sentences: list):
+        return sum(len(sentence) for sentence in sentences) / len(sentences)
