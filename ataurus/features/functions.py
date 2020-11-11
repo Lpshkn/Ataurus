@@ -2,6 +2,7 @@
 This module contains functions to extract features from a list of tokens/sentences.
 """
 import pymorphy2
+import re
 
 
 def avg_len_words(tokens: list):
@@ -28,3 +29,9 @@ def pos_distribution(tokens: list) -> dict:
     distribution = {first: second / summary for first, second in distribution.items()}
 
     return distribution
+
+
+def foreign_words_ratio(tokens: list):
+    """Feature №15. Foreign words / all words ratio."""
+    foreign = [token for token in tokens if re.search(r"[^\s\d\Wа-яА-ЯёЁ]", token)]
+    return len(foreign) / len(tokens)
