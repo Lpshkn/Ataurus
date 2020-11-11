@@ -1,6 +1,7 @@
 """
 Module represents a class that will process data to extract a vector of features from it.
 """
+import pandas as pd
 from preparing.preparator import Preparator
 
 
@@ -14,11 +15,37 @@ class FeaturesExtractor:
         self._tokens = None
         self._sentences = None
 
-    def fit(self):
-        pass
+    def fit(self,
+            avg_len_words=True,
+            avg_len_sentences=True):
+        """
+        Extractor iterates for each text and extracts features like as a dict.
+        Returns a DataFrame object with columns such as authors and features.
+        :param avg_len_words: an average length of tokens
+        :param avg_len_sentences: an average length of sentences
+        :return: DataFrame object with columns 'Authors' and list of features
+        """
+        all_tokens = self._preparator.tokens()
+        all_sentences = self._preparator.sentences(lower=True, delete_punctuations=True)
+
+        all_features = []
+        for tokens, sentences in zip(all_tokens, all_sentences):
+            features = {}
+            if avg_len_words:
+                features['avg_len_words'] = self._avg_len_words(tokens)
+            if avg_len_sentences:
+                features['avg_len_sentences'] = self._avg_len_sentences(sentences)
+            all_features.append(features)
+
+        if not all_features:
+            raise ValueError("No features were extracted during fitting of FeaturesExtractor")
+
+        self._features = pd.DataFrame(all_features)
 
     @property
-    def features(self):
+    def features(self) -> pd.DataFrame:
+        if self._features is None:
+            raise ValueError("The list of features is None, the extractor wasn't fitted")
         return self._features
 
     @staticmethod
