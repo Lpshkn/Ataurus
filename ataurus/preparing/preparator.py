@@ -15,10 +15,12 @@ class Preparator:
             raise TypeError("The data isn't instance of pd.DataFrame")
         self._data = data
 
-        try:
-            self._texts = self.data['text'].to_numpy()
-        except KeyError:
+        if not ('author' in self._data):
+            raise KeyError("The input data in .csv format hasn't 'author' column, please fix your file")
+        if not ('text' in self._data):
             raise KeyError("The input data in .csv format hasn't 'text' column, please fix your file")
+
+        self._texts = self.data['text'].to_numpy()
 
     @property
     def data(self):
