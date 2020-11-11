@@ -2,6 +2,7 @@
 Module represents a class that will process data to extract a vector of features from it.
 """
 import pandas as pd
+import features.functions as funcs
 from preparing.preparator import Preparator
 
 
@@ -19,7 +20,7 @@ class FeaturesExtractor:
             avg_len_words=True,
             avg_len_sentences=True):
         """
-        Extractor iterates for each text and extracts features like as a dict.
+        Extractor iterates for each text and extracts features like a dict.
         Returns a DataFrame object with columns such as authors and features.
         :param avg_len_words: an average length of tokens
         :param avg_len_sentences: an average length of sentences
@@ -32,9 +33,9 @@ class FeaturesExtractor:
         for tokens, sentences in zip(all_tokens, all_sentences):
             features = {}
             if avg_len_words:
-                features['avg_len_words'] = self._avg_len_words(tokens)
+                features['avg_len_words'] = funcs.avg_len_words(tokens)
             if avg_len_sentences:
-                features['avg_len_sentences'] = self._avg_len_sentences(sentences)
+                features['avg_len_sentences'] = funcs.avg_len_sentences(sentences)
             all_features.append(features)
 
         if not all_features:
@@ -48,10 +49,3 @@ class FeaturesExtractor:
             raise ValueError("The list of features is None, the extractor wasn't fitted")
         return self._features
 
-    @staticmethod
-    def _avg_len_words(tokens: list):
-        return sum(len(token) for token in tokens) / len(tokens)
-
-    @staticmethod
-    def _avg_len_sentences(sentences: list):
-        return sum(len(sentence) for sentence in sentences) / len(sentences)
