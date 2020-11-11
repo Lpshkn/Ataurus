@@ -18,12 +18,14 @@ class FeaturesExtractor:
 
     def fit(self,
             avg_len_words=True,
-            avg_len_sentences=True):
+            avg_len_sentences=True,
+            pos_distribution=True):
         """
         Extractor iterates for each text and extracts features like a dict.
         Returns a DataFrame object with columns such as authors and features.
         :param avg_len_words: an average length of tokens
         :param avg_len_sentences: an average length of sentences
+        :param pos_distribution: distribution of part of speech
         :return: DataFrame object with columns 'Authors' and list of features
         """
         all_tokens = self._preparator.tokens()
@@ -36,6 +38,8 @@ class FeaturesExtractor:
                 features['avg_len_words'] = funcs.avg_len_words(tokens)
             if avg_len_sentences:
                 features['avg_len_sentences'] = funcs.avg_len_sentences(sentences)
+            if pos_distribution:
+                features.update(funcs.pos_distribution(tokens))
             all_features.append(features)
 
         if not all_features:
