@@ -49,7 +49,7 @@ class Configurator:
         parameters = self._parser.parse_args(args)
 
         # At least one of the parameters must be specified
-        if not (parameters.file or parameters.input):
+        if not parameters.file:
             self._parser.error('No data was passed, add -f/--file to pass a csv file')
 
         return parameters
