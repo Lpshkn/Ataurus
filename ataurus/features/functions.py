@@ -3,6 +3,7 @@ This module contains functions to extract features from a list of tokens/sentenc
 """
 import pymorphy2
 import re
+from collections import Counter
 
 
 def avg_len_words(tokens: list):
@@ -35,3 +36,13 @@ def foreign_words_ratio(tokens: list):
     """Feature №15. Foreign words / all words ratio."""
     foreign = [token for token in tokens if re.search(r"[^\s\d\Wа-яА-ЯёЁ]", token)]
     return len(foreign) / len(tokens)
+
+
+def vocabulary_richness(tokens: list):
+    """Feature №17. Vocabulary richness."""
+    morph = pymorphy2.MorphAnalyzer()
+    normal_tokens = []
+    for token in tokens:
+        normal_tokens.append(morph.parse(token)[0].normal_form)
+    counter = Counter(normal_tokens)
+    return len(counter) / len(tokens)
