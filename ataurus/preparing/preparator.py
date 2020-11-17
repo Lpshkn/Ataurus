@@ -20,6 +20,7 @@ class Preparator:
         if not ('text' in self._data):
             raise KeyError("The input data in .csv format hasn't 'text' column, please fix your file")
 
+        self._data = self._data.dropna()
         self._authors = self.data['author'].values
         self._texts = self.data['text'].to_numpy()
 
@@ -89,6 +90,8 @@ class Preparator:
 
         for i in index:
             text = self._process_text(i, lower=False, delete_whitespace=False, delete_urls=True)
+            if not text:
+                continue
 
             if lower:
                 sentences = [sentence.text.lower() for sentence in sentenize(text)]
@@ -117,6 +120,9 @@ class Preparator:
         :return: str - processed text
         """
         text = self._texts[index]
+        if not text:
+            return None
+
         if not isinstance(text, str):
             raise TypeError("Text value is not string")
 
