@@ -3,6 +3,7 @@ Module represents a class that will process data to extract a vector of features
 """
 import pandas as pd
 import features.functions as funcs
+import tqdm
 from preparing.preparator import Preparator
 
 
@@ -36,25 +37,36 @@ class FeaturesExtractor:
         all_sentences = self._preparator.sentences(lower=True, delete_punctuations=True)
 
         all_features = []
-        for tokens, sentences in zip(all_tokens, all_sentences):
+        print('Begin fitting on the train data...')
+        for tokens, sentences, author in tqdm.tqdm(list(zip(all_tokens, all_sentences, self._preparator.authors))):
+            if not tokens or not sentences:
+                continue
+
             features = {}
+
+            foreign_ratio = funcs.foreign_words_ratio(tokens)
+            # Check if it's an English article, we can't process it
+            if foreign_ratio >= 0.6:
+                continue
+            if foreign_words_ratio:
+                features['foreign_words_ratio'] = foreign_ratio
+
             if avg_len_words:
                 features['avg_len_words'] = funcs.avg_len_words(tokens)
             if avg_len_sentences:
                 features['avg_len_sentences'] = funcs.avg_len_sentences(sentences)
             if pos_distribution:
                 features.update(funcs.pos_distribution(tokens))
-            if foreign_words_ratio:
-                features['foreign_words_ratio'] = funcs.foreign_words_ratio(tokens)
             if vocabulary_richness:
                 features['vocabulary_richness'] = funcs.vocabulary_richness(tokens)
+
+            features['author'] = author
             all_features.append(features)
 
         if not all_features:
             raise ValueError("No features were extracted during fitting of FeaturesExtractor")
 
         self._features = pd.DataFrame(all_features)
-        self._features['author'] = self._preparator.authors
 
     @property
     def features(self) -> pd.DataFrame:
