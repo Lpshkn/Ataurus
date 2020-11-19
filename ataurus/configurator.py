@@ -3,10 +3,16 @@ This module represents functions for options of the command line.
 Also module implements a class containing information about the project and all the information that
 will be printed in the command line.
 """
-
+import os
 import re
 import argparse
+import pickle
 import pandas as pd
+
+
+CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.curdir), 'config_data')
+MODEL_FILE = 'model.pickle'
+FEATURES_FILE = 'features.csv'
 
 
 class Configurator:
@@ -33,11 +39,42 @@ class Configurator:
         :return: an instance of the ArgumentParser class
         """
         parser = argparse.ArgumentParser(prog=program_name, description=description, epilog=epilog)
+        subparsers = parser.add_subparsers(title='Commands', dest='command')
 
-        parser.add_argument('-f', '--file',
-                            help='the input file in the CSV format',
-                            type=argparse.FileType(mode='r', encoding='utf-8'))
+        # Info mode
+        info = subparsers.add_parser('info',
+                                     help='info mode to get more information about a model or additional settings')
 
+        info.add_argument('-f', '--features',
+                          help='the name of a file containing extracted features',
+                          default=os.path.join(CONFIG_DIRECTORY, FEATURES_FILE),
+                          type=argparse.FileType(mode='r', encoding='utf-8'))
+        info.add_argument('-m', '--model',
+                          help='the name of a file containing a model',
+                          default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                          type=argparse.FileType(mode='r', encoding='utf-8'))
+
+        # Train mode
+        train = subparsers.add_parser('train',
+                                      help='train a model')
+        train.add_argument('-i', '--input',
+                           help="the name of a .csv file containing train data",
+                           type=argparse.FileType(mode='r', encoding='utf-8'))
+        train.add_argument('-o', '--output',
+                           help="the name of a file where a model will be saved",
+                           default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                           type=str)
+
+        # Predict mode
+        predict = subparsers.add_parser('predict',
+                                        help='make predictions')
+        predict.add_argument('input',
+                             help="the name of a .csv file containing data that you need to predict authors for",
+                             type=argparse.FileType(mode='r', encoding='utf-8'))
+        predict.add_argument('-m', '--model',
+                             help='the name of a file containing a model',
+                             default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                             type=argparse.FileType(mode='r', encoding='utf-8'))
         return parser
 
     def _get_parameters(self, args):
@@ -48,15 +85,27 @@ class Configurator:
         """
         parameters = self._parser.parse_args(args)
 
-        # At least one of the parameters must be specified
-        if not parameters.file:
-            self._parser.error('No data was passed, add -f/--file to pass a csv file')
+        if parameters.command == 'info':
+            pass
+        elif parameters.command == 'train':
+            # At least one of the parameters must be specified
+            if not parameters.input:
+                self._parser.error('No data was passed, add -i/--input to pass a csv file')
+        elif parameters.command == 'predict':
+            pass
 
         return parameters
 
     @property
-    def data(self) -> pd.DataFrame:
-        file = self._parameters.file
+    def command(self) -> str:
+        return self._parameters.command
+
+    @property
+    def input_data(self) -> pd.DataFrame:
+        if not ('input' in self._parameters):
+            raise ValueError('You try to get an input data, but this option is None')
+        file = self._parameters.input
+
         # The input file must be csv format because of it will provide safe operations with data
         if not re.search(r'\.csv$', file.name):
             file.close()
@@ -69,3 +118,40 @@ class Configurator:
             raise ValueError("Data in the input file isn't UTF-8 encoding")
 
         return df
+
+    @property
+    def model(self):
+        if not ('model' in self._parameters):
+            raise ValueError('You try to get a model, but this option is None')
+
+        return pickle.load(self._parameters.model)
+
+    @property
+    def features(self):
+        if not ('features' in self._parameters):
+            raise ValueError('You try to get features, but this option is None')
+
+        filename = self._parameters.features
+        if 'input' in self._parameters:
+            return open(filename, 'w')
+        else:
+            if not re.search(r'\.csv$', filename):
+                raise ValueError("The features file isn't csv format")
+
+            try:
+                df = pd.read_csv(filename)
+            except UnicodeDecodeError:
+                raise ValueError("Data in the input file isn't UTF-8 encoding")
+
+            return df
+
+    @property
+    def output_file(self):
+        if not ('output' in self._parameters):
+            raise ValueError('You try to get output filename to save a model, but this option is None')
+        output = self._parameters.output
+        parent_path = os.path.dirname(output)
+        if not os.path.exists(parent_path):
+            os.makedirs(parent_path)
+
+        return output
