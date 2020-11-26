@@ -36,8 +36,9 @@ class FeaturesExtractor:
         all_tokens = self._preparator.tokens()
         all_sentences = self._preparator.sentences(lower=True, delete_punctuations=True)
 
+        print('Begin extracting features from the data...')
+
         all_features = []
-        print('Begin fitting on the train data...')
         for tokens, sentences, author in tqdm.tqdm(list(zip(all_tokens, all_sentences, self._preparator.authors))):
             if not tokens or not sentences:
                 continue
