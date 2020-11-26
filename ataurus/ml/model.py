@@ -24,9 +24,13 @@ class Model:
             X = StandardScaler().fit_transform(self.X)
         y = LabelEncoder().fit_transform(self.y)
 
-        param_grid = [
-            {'n_estimators': [50, 100, 200], 'max_depth': [2, 6, 9], 'min_samples_leaf': [1, 2, 3]}
-        ]
+        param_grid = {
+            'n_estimators': [50, 100, 200, 300],
+            'max_depth': [2, 4, 6, 8, 9],
+            'min_samples_leaf': [1, 2, 3, 4],
+            'criterion': ['gini', 'entropy'],
+            'max_features': ['sqrt', 'log2']
+        }
 
         print('Begin searching the best hyper parameters of the model...')
         clf = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs=-1, verbose=1, cv=5)
@@ -34,6 +38,7 @@ class Model:
         self.model = clf.best_estimator_
         print('Best score of the model: ', clf.best_score_)
         print('Best estimator: ', clf.best_estimator_)
+        print('Best parameters: ', clf.best_params_)
 
     def save(self, name: str):
         """
