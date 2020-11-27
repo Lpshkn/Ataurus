@@ -6,23 +6,18 @@ import pickle
 
 
 class Model:
-    def __init__(self, data: pd.DataFrame):
-        if not isinstance(data, pd.DataFrame):
-            raise TypeError("The data isn't instance of pd.DataFrame")
-        self._data = data
-        self.X = data.drop('author', axis=1).values
-        self.y = data['author'].values
+    def __init__(self):
         self.model = None
 
-    def fit(self, scaling=True):
+    def fit(self, X, y):
         """
         Fit the model.
-        :param scaling: to scale the features
+        :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
+        :param y: ndarray of shape (n_samples,) Target values.
+        :return: self
         """
-        X = self.X
-        if scaling:
-            X = StandardScaler().fit_transform(self.X)
-        y = LabelEncoder().fit_transform(self.y)
+        X = StandardScaler().fit_transform(X)
+        y = LabelEncoder().fit_transform(y)
 
         param_grid = {
             'n_estimators': [50, 100, 200, 300],
@@ -39,6 +34,18 @@ class Model:
         print('Best score of the model: ', clf.best_score_)
         print('Best estimator: ', clf.best_estimator_)
         print('Best parameters: ', clf.best_params_)
+
+    def predict(self, X):
+        """
+        Predict targets.
+        :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
+        :return: predicted targets
+        """
+        if not self.model:
+            raise ValueError("The model wasn't fitted, so it can't predict labels")
+
+        X = StandardScaler().fit_transform(X)
+        return self.model.predict(X)
 
     def save(self, name: str):
         """
