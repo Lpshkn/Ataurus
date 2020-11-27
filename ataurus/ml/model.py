@@ -18,9 +18,6 @@ class Model:
         :param y: ndarray of shape (n_samples,) Target values.
         :return: self
         """
-        X = StandardScaler().fit_transform(X)
-        y = LabelEncoder().fit_transform(y)
-
         param_grid = {
             'n_estimators': [50, 100, 200, 300],
             'max_depth': [2, 4, 6, 8, 9],
@@ -37,7 +34,9 @@ class Model:
         self.best_params = clf.best_params_
         print('Best score of the model: ', clf.best_score_)
         print('Best estimator: ', clf.best_estimator_)
-        print('Best parameters: ', clf.best_params_)
+        print('Best parameters: ')
+        for param, value in self.best_params.items():
+            print(f'\t{param}:', value)
 
     def predict(self, X):
         """
