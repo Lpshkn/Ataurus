@@ -9,17 +9,27 @@ def main():
     configurator = cfg.Configurator(sys.argv[1:])
 
     if configurator.command == 'info':
-        pass
+        model = configurator.model
+        model.info()
+
     elif configurator.command == 'train':
-        preparator = Preparator(configurator.input_data)
-        extractor = FeaturesExtractor(preparator)
-        extractor.fit()
+        preparator = Preparator().fit(configurator.input_data)
+        extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
         print('FEATURES:\n', extractor.features)
-        model = Model(extractor.features)
-        model.fit()
+
+        model = Model()
+        X = extractor.features.drop('author', axis=1)
+        y = extractor.features['author']
+        model.fit(X, y)
         model.save(configurator.output_file)
+
     elif configurator.command == 'predict':
-        pass
+        preparator = Preparator().fit(configurator.input_data)
+        extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
+
+        model = configurator.model
+        X = extractor.features.drop('author', axis=1)
+        print('Predictions:', model.predict(X))
 
 
 if __name__ == '__main__':
