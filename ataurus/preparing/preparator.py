@@ -10,26 +10,30 @@ from .rules import PUNCTUATIONS, URLS
 
 
 class Preparator:
-    def __init__(self, data: pd.DataFrame):
+    def __init__(self):
+        self._authors = None
+        self._texts = None
+
+    def fit(self, data: pd.DataFrame):
+        """
+        Methods gets texts and authors from the passed data.
+        :param data: DataFrame object containing 'text' and 'author' columns (it can be None)
+        :return: self
+        """
         if not isinstance(data, pd.DataFrame):
             raise TypeError("The data isn't instance of pd.DataFrame")
-        self._data = data
 
-        if not ('author' in self._data):
-            raise KeyError("The input data in .csv format hasn't 'author' column, please fix your file")
-        if not ('text' in self._data):
+        if not ('text' in data):
             raise KeyError("The input data in .csv format hasn't 'text' column, please fix your file")
 
-        self._data = self._data.dropna()
-        self._authors = self.data['author'].values
-        self._texts = self.data['text'].to_numpy()
+        data = data.dropna()
+        self._texts = data['text'].to_numpy()
 
-    @property
-    def data(self):
-        """
-        It's unprocessed data, necessary if a programmer will want to process the source data himself.
-        """
-        return self._data
+        # It can be test data to predict targets
+        if 'author' in data:
+            self._authors = data['author'].values
+
+        return self
 
     @property
     def authors(self):
