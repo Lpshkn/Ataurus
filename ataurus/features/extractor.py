@@ -8,16 +8,15 @@ from preparing.preparator import Preparator
 
 
 class FeaturesExtractor:
-    def __init__(self, preparator: Preparator):
-        if not isinstance(preparator, Preparator):
-            raise TypeError("The preparator's instance isn't Preparator.")
-
-        self._preparator = preparator
+    def __init__(self):
         self._features = None
         self._tokens = None
         self._sentences = None
 
     def fit(self,
+            tokens,
+            sentences,
+            authors,
             avg_len_words=True,
             avg_len_sentences=True,
             pos_distribution=True,
@@ -26,6 +25,9 @@ class FeaturesExtractor:
         """
         Extractor iterates for each text and extracts features like a dict.
         Returns a DataFrame object with columns such as authors and features.
+        :param tokens: the tokens from the text
+        :param sentences: the sentences from the text
+        :param authors: a list of authors
         :param avg_len_words: an average length of tokens
         :param avg_len_sentences: an average length of sentences
         :param pos_distribution: distribution of part of speech
@@ -33,19 +35,16 @@ class FeaturesExtractor:
         :param vocabulary_richness: vocabulary richness
         :return: DataFrame object with columns 'Authors' and list of features
         """
-        all_tokens = self._preparator.tokens()
-        all_sentences = self._preparator.sentences(lower=True, delete_punctuations=True)
-
         print('Begin extracting features from the data...')
 
         all_features = []
-        for tokens, sentences, author in tqdm.tqdm(list(zip(all_tokens, all_sentences, self._preparator.authors))):
-            if not tokens or not sentences:
+        for _tokens, _sentences, author in tqdm.tqdm(list(zip(tokens, sentences, authors))):
+            if not _tokens or not _sentences:
                 continue
 
             features = {}
 
-            foreign_ratio = funcs.foreign_words_ratio(tokens)
+            foreign_ratio = funcs.foreign_words_ratio(_tokens)
             # Check if it's an English article, we can't process it
             if foreign_ratio >= 0.6:
                 continue
@@ -53,13 +52,13 @@ class FeaturesExtractor:
                 features['foreign_words_ratio'] = foreign_ratio
 
             if avg_len_words:
-                features['avg_len_words'] = funcs.avg_len_words(tokens)
+                features['avg_len_words'] = funcs.avg_len_words(_tokens)
             if avg_len_sentences:
-                features['avg_len_sentences'] = funcs.avg_len_sentences(sentences)
+                features['avg_len_sentences'] = funcs.avg_len_sentences(_sentences)
             if pos_distribution:
-                features.update(funcs.pos_distribution(tokens))
+                features.update(funcs.pos_distribution(_tokens))
             if vocabulary_richness:
-                features['vocabulary_richness'] = funcs.vocabulary_richness(tokens)
+                features['vocabulary_richness'] = funcs.vocabulary_richness(_tokens)
 
             features['author'] = author
             all_features.append(features)
@@ -68,6 +67,7 @@ class FeaturesExtractor:
             raise ValueError("No features were extracted during fitting of FeaturesExtractor")
 
         self._features = pd.DataFrame(all_features)
+        return self
 
     @property
     def features(self) -> pd.DataFrame:
