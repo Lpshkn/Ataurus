@@ -44,11 +44,6 @@ class Configurator:
         # Info mode
         info = subparsers.add_parser('info',
                                      help='info mode to get more information about a model or additional settings')
-
-        info.add_argument('-f', '--features',
-                          help='the name of a file containing extracted features',
-                          default=os.path.join(CONFIG_DIRECTORY, FEATURES_FILE),
-                          type=argparse.FileType(mode='r', encoding='utf-8'))
         info.add_argument('-m', '--model',
                           help='the name of a file containing a model',
                           default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
