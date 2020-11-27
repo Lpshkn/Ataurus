@@ -60,4 +60,14 @@ class Model:
             raise ValueError("The model wasn't fitted, so it can't be saved")
 
         with open(name, 'wb') as file:
-            pickle.dump(self.model, file)
+            pickle.dump(self, file)
+
+    def info(self):
+        if not self.estimator:
+            raise ValueError("The model wasn't fitted, so it hasn't any information")
+
+        print('Estimator:', self.estimator.__class__.__name__)
+        print('Best score:', self.best_score)
+        print('Parameters:')
+        for param, value in self.best_params.items():
+            print(f'\t{param}:', value)
