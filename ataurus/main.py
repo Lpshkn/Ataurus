@@ -18,9 +18,7 @@ def main():
         print('FEATURES:\n', extractor.features)
 
         model = Model()
-        X = extractor.features.drop('author', axis=1)
-        y = extractor.features['author']
-        model.fit(X, y)
+        model.fit(extractor.X, extractor.y)
         model.save(configurator.output_file)
 
     elif configurator.command == 'predict':
@@ -28,8 +26,7 @@ def main():
         extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
 
         model = configurator.model
-        X = extractor.features.drop('author', axis=1)
-        print('Predictions:', model.predict(X))
+        print('Predictions:', model.predict(extractor.X))
 
 
 if __name__ == '__main__':
