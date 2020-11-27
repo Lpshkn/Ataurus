@@ -4,6 +4,8 @@ Module represents a class that will process data to extract a vector of features
 import pandas as pd
 import features.functions as funcs
 import tqdm
+import time
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from preparing.preparator import Preparator
 
 
@@ -12,6 +14,9 @@ class FeaturesExtractor:
         self._features = None
         self._tokens = None
         self._sentences = None
+        self._classes = None
+        self._X = None
+        self._y = None
 
     def fit(self,
             tokens,
@@ -36,6 +41,8 @@ class FeaturesExtractor:
         :return: DataFrame object with columns 'Authors' and list of features
         """
         print('Begin extracting features from the data...')
+        # Sleep for normal printing of message, because of a tqdm's message may be printed earlier than this message
+        time.sleep(1)
 
         all_features = []
         for _tokens, _sentences, author in tqdm.tqdm(list(zip(tokens, sentences, authors))):
@@ -66,7 +73,17 @@ class FeaturesExtractor:
         if not all_features:
             raise ValueError("No features were extracted during fitting of FeaturesExtractor")
 
+        all_features = pd.DataFrame(all_features)
+        X = StandardScaler().fit_transform(all_features.drop('author', axis=1))
+        le = LabelEncoder()
+        le.fit(all_features['author'])
+        y = le.transform(all_features['author'])
+
+        self._X = X
+        self._y = y
+        self._classes = le.classes_
         self._features = pd.DataFrame(all_features)
+
         return self
 
     @property
@@ -75,3 +92,23 @@ class FeaturesExtractor:
             raise ValueError("The list of features is None, the extractor wasn't fitted")
         return self._features
 
+    @property
+    def X(self) -> pd.DataFrame:
+        if self._features is None:
+            raise ValueError("The list of features is None, the extractor wasn't fitted")
+
+        return self._X
+
+    @property
+    def y(self) -> pd.DataFrame:
+        if self._features is None:
+            raise ValueError("The list of features is None, the extractor wasn't fitted")
+
+        return self._y
+
+    @property
+    def classes(self) -> list:
+        if self._features is None:
+            raise ValueError("The list of features is None, the extractor wasn't fitted")
+
+        return self._classes
