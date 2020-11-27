@@ -52,7 +52,7 @@ class Configurator:
         info.add_argument('-m', '--model',
                           help='the name of a file containing a model',
                           default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
-                          type=argparse.FileType(mode='r', encoding='utf-8'))
+                          type=str)
 
         # Train mode
         train = subparsers.add_parser('train',
@@ -74,7 +74,7 @@ class Configurator:
         predict.add_argument('-m', '--model',
                              help='the name of a file containing a model',
                              default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
-                             type=argparse.FileType(mode='r', encoding='utf-8'))
+                             type=str)
         return parser
 
     def _get_parameters(self, args):
@@ -124,7 +124,8 @@ class Configurator:
         if not ('model' in self._parameters):
             raise ValueError('You try to get a model, but this option is None')
 
-        return pickle.load(self._parameters.model)
+        with open(self._parameters.model, 'rb') as file:
+            return pickle.load(file)
 
     @property
     def features(self):
