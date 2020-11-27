@@ -7,7 +7,9 @@ import pickle
 
 class Model:
     def __init__(self):
-        self.model = None
+        self.estimator = None
+        self.best_score = None
+        self.best_params = None
 
     def fit(self, X, y):
         """
@@ -30,7 +32,9 @@ class Model:
         print('Begin searching the best hyper parameters of the model...')
         clf = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs=-1, verbose=1, cv=5)
         clf.fit(X, y)
-        self.model = clf.best_estimator_
+        self.estimator = clf.best_estimator_
+        self.best_score = clf.best_score_
+        self.best_params = clf.best_params_
         print('Best score of the model: ', clf.best_score_)
         print('Best estimator: ', clf.best_estimator_)
         print('Best parameters: ', clf.best_params_)
@@ -41,16 +45,19 @@ class Model:
         :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
         :return: predicted targets
         """
-        if not self.model:
+        if not self.estimator:
             raise ValueError("The model wasn't fitted, so it can't predict labels")
 
         X = StandardScaler().fit_transform(X)
-        return self.model.predict(X)
+        return self.estimator.predict(X)
 
     def save(self, name: str):
         """
         Save the model into the .pickle file.
         :param name: the name of the file
         """
+        if not self.estimator:
+            raise ValueError("The model wasn't fitted, so it can't be saved")
+
         with open(name, 'wb') as file:
             pickle.dump(self.model, file)
