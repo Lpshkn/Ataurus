@@ -27,7 +27,7 @@ There are average values below for number of punctuations in a text.
 №12. Standard deviation of length of sentences  
 №13. Average length of paragraph  
 №14. Length of document  
-№15. Average count of foreign words 
+№15. Foreign words / all words ratio  
 №16. Average count of stop words 
 
 
