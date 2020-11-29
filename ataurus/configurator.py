@@ -10,9 +10,10 @@ import pickle
 import pandas as pd
 
 
-CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.curdir), 'config_data')
+CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.curdir)), '.config')
 MODEL_FILE = 'model.pickle'
 FEATURES_FILE = 'features.csv'
+CACHE_DIRECTORY = os.path.join(CONFIG_DIRECTORY, '.cache')
 
 
 class Configurator:
@@ -52,7 +53,7 @@ class Configurator:
         # Train mode
         train = subparsers.add_parser('train',
                                       help='train a model')
-        train.add_argument('-i', '--input',
+        train.add_argument('input',
                            help="the name of a .csv file containing train data",
                            type=argparse.FileType(mode='r', encoding='utf-8'))
         train.add_argument('-o', '--output',
@@ -89,7 +90,18 @@ class Configurator:
         elif parameters.command == 'predict':
             pass
 
+        # If no errors occurred, create config directories
+        self._initialize_directories()
+
         return parameters
+
+    @staticmethod
+    def _initialize_directories():
+        """
+        Create the directories for config files.
+        """
+        if not os.path.exists(CACHE_DIRECTORY):
+            os.makedirs(CACHE_DIRECTORY)
 
     @property
     def command(self) -> str:
