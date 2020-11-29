@@ -34,6 +34,7 @@ class Configurator:
 
         # Get parameters from the arguments received from the command line
         self._parameters = self._get_parameters(args)
+        self._cache = None
 
     @staticmethod
     def _get_parser(program_name: str = None, description: str = None, epilog: str = None) -> argparse.ArgumentParser:
@@ -95,6 +96,8 @@ class Configurator:
 
         # If no errors occurred, create config directories
         self._initialize_directories()
+        # Load cfg file and check that files are contained in the .cache directory
+        self._initialize_cache()
 
         return parameters
 
@@ -106,14 +109,47 @@ class Configurator:
         if not os.path.exists(CACHE_DIRECTORY):
             os.makedirs(CACHE_DIRECTORY)
 
+    def _initialize_cache(self):
+        """
+        Method initialize the config cache file containing information about filenames and its cache.
+        If there are some troubles with matching the names of files and files in .cache directory,
+        this method will remove these values and files.
+        """
+        if not os.path.exists(CACHE_CFG_FILE):
+            self._cache = {}
+            for filename in os.listdir(CACHE_DIRECTORY):
+                os.remove(filename)
+        else:
+            with open(CACHE_CFG_FILE, 'r') as file:
+                self._cache = json.load(file)
+
+            filenames = set(self._cache.keys())
+            cache_filenames = set(os.listdir(CACHE_DIRECTORY))
+
+            # Delete lost keys from the dict
+            for filename in filenames:
+                name, extension = filename.rsplit('.', 1)
+                cache_filename = name + '_' + POSTFIX_CACHE_FEATURES + extension
+
+                # If file wasn't found in the .cache directory, remove it from the dict
+                if cache_filename not in cache_filenames:
+                    del self._cache[filename]
+
+            # Delete lost files in the .cache directory
+            for cache_filename in cache_filenames:
+                name, extension = cache_filename.rsplit('.', 1)
+                name = name.rsplit('_', 1)[0]
+                filename = name + extension
+
+                if filename not in filenames:
+                    os.remove(os.path.join(CACHE_DIRECTORY, filename))
+
     @property
     def command(self) -> str:
         return self._parameters.command
 
     @property
     def input_data(self) -> pd.DataFrame:
-        if not ('input' in self._parameters):
-            raise ValueError('You try to get an input data, but this option is None')
         file = self._parameters.input
 
         # The input file must be csv format because of it will provide safe operations with data
