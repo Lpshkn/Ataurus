@@ -8,12 +8,17 @@ import re
 import argparse
 import pickle
 import pandas as pd
+import hashlib as hl
+import json
+from ataurus.features.extractor import FeaturesExtractor
 
 
 CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.curdir)), '.config')
-MODEL_FILE = 'model.pickle'
-FEATURES_FILE = 'features.csv'
+MODEL_FILE = os.path.join(CONFIG_DIRECTORY, 'model.pickle')
+CACHE_CFG_FILE = os.path.join(CONFIG_DIRECTORY, 'cache_cfg.json')
+
 CACHE_DIRECTORY = os.path.join(CONFIG_DIRECTORY, '.cache')
+POSTFIX_CACHE_FEATURES = 'features'
 
 
 class Configurator:
@@ -47,7 +52,7 @@ class Configurator:
                                      help='info mode to get more information about a model or additional settings')
         info.add_argument('-m', '--model',
                           help='the name of a file containing a model',
-                          default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                          default=MODEL_FILE,
                           type=str)
 
         # Train mode
@@ -58,7 +63,7 @@ class Configurator:
                            type=argparse.FileType(mode='r', encoding='utf-8'))
         train.add_argument('-o', '--output',
                            help="the name of a file where a model will be saved",
-                           default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                           default=MODEL_FILE,
                            type=str)
 
         # Predict mode
@@ -69,7 +74,7 @@ class Configurator:
                              type=argparse.FileType(mode='r', encoding='utf-8'))
         predict.add_argument('-m', '--model',
                              help='the name of a file containing a model',
-                             default=os.path.join(CONFIG_DIRECTORY, MODEL_FILE),
+                             default=MODEL_FILE,
                              type=str)
         return parser
 
@@ -84,9 +89,7 @@ class Configurator:
         if parameters.command == 'info':
             pass
         elif parameters.command == 'train':
-            # At least one of the parameters must be specified
-            if not parameters.input:
-                self._parser.error('No data was passed, add -i/--input to pass a csv file')
+            pass
         elif parameters.command == 'predict':
             pass
 
