@@ -13,40 +13,35 @@ class PreparatorTest(unittest.TestCase):
 
     def test_incorrect_type_data(self):
         with self.assertRaises(TypeError):
-            prep.Preparator([])
+            prep.Preparator().fit([])
 
     def test_no_columnname_data(self):
         df = pd.DataFrame([1, 2, 3])
         with self.assertRaises(KeyError):
-            prep.Preparator(df)
-
-    def test_correct_data(self):
-        df = pd.DataFrame([[1, 'aa'], [2, 'bb'], [3, 'cc']], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
-        self.assertTrue(all(df == preparator.data))
+            prep.Preparator().fit(df)
 
     def test_process_text_method(self):
         df = pd.DataFrame([["РАЗРАБОТЧИКИ LinkedIn    \n\n  объявили о появившейся возможности"
                            "https://google.com/", "author"]], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
+        preparator = prep.Preparator().fit(df)
         processed = preparator._process_text(0)
         self.assertEqual(processed, 'разработчики linkedin объявили о появившейся возможности')
 
         df = pd.DataFrame([[1, 'aa'], [2, 'bb'], [3, 'cc']], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
+        preparator = prep.Preparator().fit(df)
         with self.assertRaises(TypeError):
             preparator._process_text(0)
 
     def test_tokens_method(self):
         df = pd.DataFrame([["РАЗРАБОТЧИКИ?, !$ LinkedIn    \n\n  объявили о появившейся возможности#%^^%!@#$%^&*(?"
                            "https://google.com/", "author"]], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
+        preparator = prep.Preparator().fit(df)
         tokens = preparator.tokens(0)
         self.assertEqual(tokens, [['разработчики', 'linkedin', 'объявили', 'о', 'появившейся', 'возможности']])
 
         df = pd.DataFrame([["РАЗРАБОТЧИКИ, LinkedIn    \n\n  объявили ? о появившейся возможности!"
                            "https://google.com/", "author"]], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
+        preparator = prep.Preparator().fit(df)
         tokens = preparator.tokens(0, False, False)
         self.assertEqual(tokens,
                          [['РАЗРАБОТЧИКИ', ',', 'LinkedIn', 'объявили', '?', 'о', 'появившейся', 'возможности', '!']])
@@ -54,7 +49,7 @@ class PreparatorTest(unittest.TestCase):
     def test_sentences_method(self):
         df = pd.DataFrame([["Это расширение. Было!? Анонсировано в! Рамках продолжения политики LinkedIn. "
                            "О непрерывности,%;%:%* профессионального.", "author"]], columns=['text', 'author'])
-        preparator = prep.Preparator(df)
+        preparator = prep.Preparator().fit(df)
         sentences = preparator.sentences(0, True, True)
         self.assertEqual(sentences,
                          [['это расширение', 'было', 'анонсировано в', 'рамках продолжения политики linkedin',
