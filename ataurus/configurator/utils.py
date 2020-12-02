@@ -14,6 +14,31 @@ CACHE_DIRECTORY = os.path.join(CONFIG_DIRECTORY, '.cache')
 POSTFIX_CACHE_FEATURES = '_features'
 
 
+def get_parts_file(filename: str, extension=None):
+    """
+    Gets the name, delimiter and extension from the filename.
+    Delimiter may be empty or '.'.
+
+    :param filename: original filename
+    :param extension: extension that you want to set to this file
+    :return: name, extension, delimiter
+    """
+    try:
+        name, _extension = os.path.basename(filename).rsplit('.', 1)
+        delimiter = '.'
+    except ValueError:
+        name = os.path.basename(filename)
+        _extension = ''
+        delimiter = ''
+
+    if not extension:
+        extension = _extension
+    else:
+        delimiter = '.'
+
+    return name, extension, delimiter
+
+
 def convert_to_cache_name(filename: str, extension=None):
     """
     Convert from the filename to the filename that will be in .cache directory.
@@ -22,12 +47,9 @@ def convert_to_cache_name(filename: str, extension=None):
     :param extension: this extension will be set to the filename as result of this function
     :return: the name of the cache file
     """
-    name, _extension = os.path.basename(filename).rsplit('.', 1)
+    name, extension, delimiter = get_parts_file(filename, extension)
 
-    if not extension:
-        extension = _extension
-
-    cache_filename = name + POSTFIX_CACHE_FEATURES + '.' + extension
+    cache_filename = name + POSTFIX_CACHE_FEATURES + delimiter + extension
     return cache_filename
 
 
@@ -39,13 +61,12 @@ def convert_from_cache_name(cache_filename: str, extension=None):
     :param extension: this extension will be set to the filename as result of this function
     :return: the name of the original file
     """
-    name, _extension = os.path.basename(cache_filename).rsplit('.', 1)
+    name, extension, delimiter = get_parts_file(cache_filename, extension)
 
-    if not extension:
-        extension = _extension
+    # Here ValueError may be occurred, if the name of cache file hasn't the postfix
+    name, rest = name.rsplit(POSTFIX_CACHE_FEATURES, 1)
 
-    name = name.rsplit(POSTFIX_CACHE_FEATURES, 1)[0]
-    filename = name + '.' + extension
+    filename = name + delimiter + extension
     return filename
 
 
