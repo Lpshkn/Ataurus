@@ -8,17 +8,10 @@ import re
 import argparse
 import pickle
 import pandas as pd
-import hashlib as hl
 import json
-from ataurus.features.extractor import FeaturesExtractor
-
-
-CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.curdir)), '.config')
-MODEL_FILE = os.path.join(CONFIG_DIRECTORY, 'model.pickle')
-CACHE_CFG_FILE = os.path.join(CONFIG_DIRECTORY, 'cache_cfg.json')
-
-CACHE_DIRECTORY = os.path.join(CONFIG_DIRECTORY, '.cache')
-POSTFIX_CACHE_FEATURES = 'features'
+from features.extractor import FeaturesExtractor
+from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cache_name,
+                    convert_from_cache_name, get_hash)
 
 
 class Configurator:
@@ -32,9 +25,9 @@ class Configurator:
     def __init__(self, args):
         self._parser = self._get_parser(Configurator.NAME, Configurator.DESCRIPTION, Configurator.EPILOG)
 
+        self._cache = None
         # Get parameters from the arguments received from the command line
         self._parameters = self._get_parameters(args)
-        self._cache = None
 
     @staticmethod
     def _get_parser(program_name: str = None, description: str = None, epilog: str = None) -> argparse.ArgumentParser:
@@ -118,7 +111,7 @@ class Configurator:
         if not os.path.exists(CACHE_CFG_FILE):
             self._cache = {}
             for filename in os.listdir(CACHE_DIRECTORY):
-                os.remove(filename)
+                os.remove(os.path.join(CACHE_DIRECTORY, filename))
         else:
             with open(CACHE_CFG_FILE, 'r') as file:
                 self._cache = json.load(file)
@@ -128,8 +121,7 @@ class Configurator:
 
             # Delete lost keys from the dict
             for filename in filenames:
-                name, extension = filename.rsplit('.', 1)
-                cache_filename = name + '_' + POSTFIX_CACHE_FEATURES + extension
+                cache_filename = convert_to_cache_name(filename)
 
                 # If file wasn't found in the .cache directory, remove it from the dict
                 if cache_filename not in cache_filenames:
@@ -137,9 +129,7 @@ class Configurator:
 
             # Delete lost files in the .cache directory
             for cache_filename in cache_filenames:
-                name, extension = cache_filename.rsplit('.', 1)
-                name = name.rsplit('_', 1)[0]
-                filename = name + extension
+                filename = convert_from_cache_name(cache_filename)
 
                 if filename not in filenames:
                     os.remove(os.path.join(CACHE_DIRECTORY, filename))
@@ -149,7 +139,7 @@ class Configurator:
         return self._parameters.command
 
     @property
-    def input_data(self) -> pd.DataFrame:
+    def input(self) -> pd.DataFrame:
         file = self._parameters.input
 
         # The input file must be csv format because of it will provide safe operations with data
