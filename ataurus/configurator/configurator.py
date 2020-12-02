@@ -153,6 +153,12 @@ class Configurator:
             file.close()
             raise ValueError("Data in the input file isn't UTF-8 encoding")
 
+        basename = os.path.basename(file.name)
+        if basename in self._cache:
+            if self._cache[basename] == get_hash(file.name):
+                with open(os.path.join(CACHE_DIRECTORY, convert_to_cache_name(basename)), 'rb') as file:
+                    return pickle.load(file)
+
         return df
 
     @property
@@ -173,3 +179,22 @@ class Configurator:
             os.makedirs(parent_path)
 
         return output
+
+    def to_cache(self, extractor: FeaturesExtractor):
+        """
+
+        :param extractor:
+        """
+        if not isinstance(extractor, FeaturesExtractor):
+            raise TypeError("You're trying to cache not FeatureExtractor's instance")
+
+        filename = self._parameters.input.name
+        basename = os.path.basename(filename)
+        self._cache[basename] = get_hash(filename)
+
+        cache_filename = convert_to_cache_name(filename)
+        with open(os.path.join(CACHE_DIRECTORY, cache_filename), 'wb') as file:
+            pickle.dump(extractor, file)
+
+        with open(CACHE_CFG_FILE, 'w') as file:
+            json.dump(self._cache, file, indent=4)
