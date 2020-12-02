@@ -182,8 +182,9 @@ class Configurator:
 
     def to_cache(self, extractor: FeaturesExtractor):
         """
+        Dumps an instance of the FeaturesExtractor to the cache directory.
 
-        :param extractor:
+        :param extractor: an instance of FeaturesExtractor
         """
         if not isinstance(extractor, FeaturesExtractor):
             raise TypeError("You're trying to cache not FeatureExtractor's instance")
