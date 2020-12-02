@@ -1,8 +1,9 @@
 import os
+import json
 import unittest.mock
 import ataurus.configurator.configurator as cfg
 from ataurus.configurator.utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, POSTFIX_CACHE_FEATURES,
-                                        convert_to_cache_name, convert_from_cache_name, get_hash)
+                                        convert_to_cache_name, convert_from_cache_name, get_hash, CONFIG_DIRECTORY)
 
 
 class ConfiguratorTest(unittest.TestCase):
@@ -35,24 +36,49 @@ class ConfiguratorTest(unittest.TestCase):
 
     @unittest.mock.patch('sys.stderr', open(os.devnull, 'w'))
     def test_incorrect_input_file(self):
-        args = ['-f', 'file']
+        args = ['train test']
         with self.assertRaises(SystemExit):
             configurator = cfg.Configurator(args)
 
     def test_existed_file(self):
-        args = ['-f', self.incorrect_file]
+        args = ['train', self.incorrect_file]
         configurator = cfg.Configurator(args)
 
     def test_file_extension(self):
-        args = ['-f', self.incorrect_file]
+        args = ['train', self.incorrect_file]
         configurator = cfg.Configurator(args)
         with self.assertRaises(ValueError):
-            data = configurator.data
+            data = configurator.input
 
     def test_correct_file(self):
-        args = ['-f', self.correct_file]
+        args = ['train', self.correct_file]
         configurator = cfg.Configurator(args)
-        data = configurator.data
+        data = configurator.input
+
+    def test_initializing_directories(self):
+        args = ['train', self.correct_file]
+        configurator = cfg.Configurator(args)
+
+        configurator._initialize_directories()
+        self.assertTrue(os.path.exists(CACHE_DIRECTORY))
+
+    def test_initializing_cache(self):
+        args = ['train', self.correct_file]
+        configurator = cfg.Configurator(args)
+
+        # Initialize and check that _cache is not None
+        configurator._initialize_directories()
+        configurator._initialize_cache()
+        self.assertIsNotNone(configurator._cache)
+
+        filename = os.path.join(CACHE_DIRECTORY, 'test')
+        with open(filename, 'w') as file:
+            file.write('teststring')
+
+        self.assertTrue(os.path.exists(filename))
+        # Now this file must be removed because _cache has no keys
+        configurator._initialize_cache()
+        self.assertFalse(os.path.exists(filename))
 
 
 class ConfiguratorUtilsTest(unittest.TestCase):
