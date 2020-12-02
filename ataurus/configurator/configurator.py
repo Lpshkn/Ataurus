@@ -80,12 +80,8 @@ class Configurator:
         """
         parameters = self._parser.parse_args(args)
 
-        if parameters.command == 'info':
-            pass
-        elif parameters.command == 'train':
-            pass
-        elif parameters.command == 'predict':
-            pass
+        if parameters.command is None:
+            self._parser.error("You must specify 1 of 3 commands: train, predict or info")
 
         # If no errors occurred, create config directories
         self._initialize_directories()
