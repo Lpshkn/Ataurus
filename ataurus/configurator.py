@@ -174,25 +174,6 @@ class Configurator:
             return pickle.load(file)
 
     @property
-    def features(self):
-        if not ('features' in self._parameters):
-            raise ValueError('You try to get features, but this option is None')
-
-        filename = self._parameters.features
-        if 'input' in self._parameters:
-            return open(filename, 'w')
-        else:
-            if not re.search(r'\.csv$', filename):
-                raise ValueError("The features file isn't csv format")
-
-            try:
-                df = pd.read_csv(filename)
-            except UnicodeDecodeError:
-                raise ValueError("Data in the input file isn't UTF-8 encoding")
-
-            return df
-
-    @property
     def output_file(self):
         if not ('output' in self._parameters):
             raise ValueError('You try to get output filename to save a model, but this option is None')
