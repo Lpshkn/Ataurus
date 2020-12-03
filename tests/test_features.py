@@ -1,5 +1,7 @@
-import unittest
+import os
+import unittest.mock
 import ataurus.features.functions as funcs
+from ataurus.features.extractor import FeaturesExtractor
 
 
 class TestFunctions(unittest.TestCase):
@@ -39,6 +41,27 @@ class TestFunctions(unittest.TestCase):
         self.assertEqual(funcs.vocabulary_richness(self.tokens_pos), 1)
         self.assertEqual(funcs.vocabulary_richness(['мы', 'мы', 'мы', 'мы']), 0.25)
         self.assertEqual(funcs.vocabulary_richness(['мы', 'z', 'мы', 'я']), 0.75)
+
+
+class TestFeaturesExtractor(unittest.TestCase):
+    def test_empty_properties(self):
+        extractor = FeaturesExtractor()
+        with self.assertRaises(ValueError):
+            features = extractor.features
+        with self.assertRaises(ValueError):
+            X = extractor.X
+        self.assertIsNone(extractor.y)
+        with self.assertRaises(ValueError):
+            classes = extractor.classes
+
+    @unittest.mock.patch('sys.stdout', open(os.devnull, 'w'))
+    @unittest.mock.patch('sys.stderr', open(os.devnull, 'w'))
+    def test_correct_data(self):
+        extractor = FeaturesExtractor()
+        extractor.fit([['ваапвап'], ['парпарпарпа']], [['пвапврпарап'],['парпарпаропроhпа']], [])
+        self.assertIsNotNone(extractor.X)
+        self.assertIsNone(extractor.y)
+        self.assertIsNone(extractor.classes)
 
 
 if __name__ == '__main__':
