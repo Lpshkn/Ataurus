@@ -1,6 +1,7 @@
 """
 Module represents a class that will process data to extract a vector of features from it.
 """
+import numpy as np
 import pandas as pd
 import features.functions as funcs
 import tqdm
@@ -42,6 +43,11 @@ class FeaturesExtractor:
         print('Begin extracting features from the data...')
         # Sleep for normal printing of message, because of a tqdm's message may be printed earlier than this message
         time.sleep(1)
+
+        tokens = np.array(tokens)
+        sentences = np.array(sentences)
+        if authors is not None:
+            authors = np.array(authors)
 
         all_features = []
         indexes = []
