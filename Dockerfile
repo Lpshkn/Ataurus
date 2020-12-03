@@ -23,4 +23,4 @@ COPY . /Ataurus
 WORKDIR /Ataurus
 
 RUN nosetests --with-coverage --cover-package=ataurus && python3 setup.py install
-ENTRYPOINT ["Ataurus"]
+ENTRYPOINT ["/bin/bash"]
