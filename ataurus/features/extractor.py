@@ -6,7 +6,6 @@ import features.functions as funcs
 import tqdm
 import time
 from sklearn.preprocessing import StandardScaler, LabelEncoder
-from preparing.preparator import Preparator
 
 
 class FeaturesExtractor:
@@ -21,7 +20,7 @@ class FeaturesExtractor:
     def fit(self,
             tokens,
             sentences,
-            authors,
+            authors=None,
             avg_len_words=True,
             avg_len_sentences=True,
             pos_distribution=True,
@@ -45,8 +44,10 @@ class FeaturesExtractor:
         time.sleep(1)
 
         all_features = []
-        for _tokens, _sentences, author in tqdm.tqdm(list(zip(tokens, sentences, authors))):
+        indexes = []
+        for _tokens, _sentences in tqdm.tqdm(list(zip(tokens, sentences))):
             if not _tokens or not _sentences:
+                indexes.append(False)
                 continue
 
             features = {}
@@ -54,10 +55,10 @@ class FeaturesExtractor:
             foreign_ratio = funcs.foreign_words_ratio(_tokens)
             # Check if it's an English article, we can't process it
             if foreign_ratio >= 0.6:
+                indexes.append(False)
                 continue
             if foreign_words_ratio:
                 features['foreign_words_ratio'] = foreign_ratio
-
             if avg_len_words:
                 features['avg_len_words'] = funcs.avg_len_words(_tokens)
             if avg_len_sentences:
@@ -67,21 +68,29 @@ class FeaturesExtractor:
             if vocabulary_richness:
                 features['vocabulary_richness'] = funcs.vocabulary_richness(_tokens)
 
-            features['author'] = author
+            indexes.append(True)
             all_features.append(features)
 
         if not all_features:
             raise ValueError("No features were extracted during fitting of FeaturesExtractor")
 
         all_features = pd.DataFrame(all_features)
-        X = StandardScaler().fit_transform(all_features.drop('author', axis=1))
-        le = LabelEncoder()
-        le.fit(all_features['author'])
-        y = le.transform(all_features['author'])
+
+        if any(authors):
+            all_features['author'] = authors[indexes]
+            X = StandardScaler().fit_transform(all_features.drop('author', axis=1))
+            le = LabelEncoder()
+            le.fit(all_features['author'])
+            classes = le.classes_
+            y = le.transform(all_features['author'])
+        else:
+            X = StandardScaler().fit_transform(all_features)
+            y = None
+            classes = None
 
         self._X = X
         self._y = y
-        self._classes = le.classes_
+        self._classes = classes
         self._features = pd.DataFrame(all_features)
 
         return self
@@ -101,9 +110,6 @@ class FeaturesExtractor:
 
     @property
     def y(self) -> pd.DataFrame:
-        if self._features is None:
-            raise ValueError("The list of features is None, the extractor wasn't fitted")
-
         return self._y
 
     @property
