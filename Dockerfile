@@ -22,5 +22,5 @@ MAINTAINER lpshkn
 COPY . /Ataurus
 WORKDIR /Ataurus
 
-RUN python3 setup.py test
-ENTRYPOINT ["python3", "./ataurus/main.py"]
+RUN nosetests --with-coverage --cover-package=ataurus && python3 setup.py install
+ENTRYPOINT ["Ataurus"]
