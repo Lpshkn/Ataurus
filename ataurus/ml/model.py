@@ -1,7 +1,6 @@
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
-import pandas as pd
 import pickle
 
 
@@ -11,23 +10,30 @@ class Model:
         self.best_score = None
         self.best_params = None
 
-    def fit(self, X, y):
+    def fit(self, X, y, grid_search=True, cv=5):
         """
         Fit the model.
         :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
         :param y: ndarray of shape (n_samples,) Target values.
+        :param cv: cross-validation classes
+        :param grid_search: if it's true, the grid search will be performed
         :return: self
         """
-        param_grid = {
-            'n_estimators': [50, 100, 200, 300],
-            'max_depth': [2, 4, 6, 8, 9],
-            'min_samples_leaf': [1, 2, 3, 4],
-            'criterion': ['gini', 'entropy'],
-            'max_features': ['sqrt', 'log2']
-        }
+        if grid_search:
+            param_grid = {
+                'n_estimators': [50, 100, 200, 300],
+                'max_depth': [2, 4, 6, 8, 9],
+                'min_samples_leaf': [1, 2, 3, 4],
+                'criterion': ['gini', 'entropy'],
+                'max_features': ['sqrt', 'log2']
+            }
+        else:
+            param_grid = {
+                'n_estimators': [100]
+            }
 
         print('Begin searching the best hyper parameters of the model...')
-        clf = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs=-1, verbose=1, cv=5)
+        clf = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs=-1, verbose=1, cv=cv)
         clf.fit(X, y)
         self.estimator = clf.best_estimator_
         self.best_score = clf.best_score_
