@@ -1,9 +1,9 @@
 import sys
-import configurator.configurator as cfg
+import ataurus.configurator.configurator as cfg
 import pandas as pd
-from preparing.preparator import Preparator
-from features.extractor import FeaturesExtractor
-from ml.model import Model
+from ataurus.preparing.preparator import Preparator
+from ataurus.features.extractor import FeaturesExtractor
+from ataurus.ml.model import Model
 
 
 def main():
