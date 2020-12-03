@@ -37,8 +37,6 @@ class Preparator:
 
     @property
     def authors(self):
-        if self._authors is None:
-            raise ValueError("The input data hasn't the 'author' column, so this list can't be obtained")
         return self._authors
 
     def tokens(self,
