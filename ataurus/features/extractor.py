@@ -3,7 +3,7 @@ Module represents a class that will process data to extract a vector of features
 """
 import numpy as np
 import pandas as pd
-import features.functions as funcs
+import ataurus.features.functions as funcs
 import tqdm
 import time
 from sklearn.preprocessing import StandardScaler, LabelEncoder

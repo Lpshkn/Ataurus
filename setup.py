@@ -1,7 +1,7 @@
 import ataurus
 from os.path import join, dirname
 from setuptools import setup, find_packages
-from ataurus.configurator import Configurator
+from ataurus.configurator.configurator import Configurator
 
 setup(
     name=Configurator.NAME,
