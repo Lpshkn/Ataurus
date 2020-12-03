@@ -133,3 +133,4 @@ dmypy.json
 
 # The tempopary directory
 temp
+.config
