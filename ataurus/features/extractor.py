@@ -82,7 +82,7 @@ class FeaturesExtractor:
 
         all_features = pd.DataFrame(all_features)
 
-        if any(authors):
+        if authors is not None and any(authors):
             all_features['author'] = authors[indexes]
             X = StandardScaler().fit_transform(all_features.drop('author', axis=1))
             le = LabelEncoder()
