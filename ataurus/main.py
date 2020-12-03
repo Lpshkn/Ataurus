@@ -8,8 +8,13 @@ from ataurus.ml.model import Model
 
 def main():
     configurator = cfg.Configurator(sys.argv[1:])
-    input_obj = configurator.input
-    if configurator.command == 'train' or configurator.command == 'predict':
+
+    if configurator.command == 'info':
+        model = configurator.model
+        model.info()
+    else:
+        input_obj = configurator.input
+
         if isinstance(input_obj, FeaturesExtractor):
             extractor = input_obj
         elif isinstance(input_obj, pd.DataFrame):
@@ -17,19 +22,14 @@ def main():
             extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
             configurator.to_cache(extractor)
 
-    if configurator.command == 'info':
-        model = configurator.model
-        model.info()
-
-    elif configurator.command == 'train':
-        print('FEATURES:\n', extractor.features)
-        model = Model()
-        model.fit(extractor.X, extractor.y)
-        model.save(configurator.output_file)
-
-    elif configurator.command == 'predict':
-        model = configurator.model
-        print('Predictions:', model.predict(extractor.X))
+        if configurator.command == 'train':
+            print('FEATURES:\n', extractor.features)
+            model = Model()
+            model.fit(extractor.X, extractor.y)
+            model.save(configurator.output_file)
+        elif configurator.command == 'predict':
+            model = configurator.model
+            print('Predictions:', model.predict(extractor.X))
 
 
 if __name__ == '__main__':
