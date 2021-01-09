@@ -64,7 +64,7 @@ def convert_from_cache_name(cache_filename: str, extension=None):
     name, extension, delimiter = get_parts_file(cache_filename, extension)
 
     # Here ValueError may be occurred, if the name of cache file hasn't the postfix
-    name, rest = name.rsplit(POSTFIX_CACHE_FEATURES, 1)
+    name = name.rsplit(POSTFIX_CACHE_FEATURES, 1)[0]
 
     filename = name + delimiter + extension
     return filename
