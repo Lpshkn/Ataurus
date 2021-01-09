@@ -103,5 +103,4 @@ class ConfiguratorUtilsTest(unittest.TestCase):
         self.assertEqual(convert_from_cache_name(filename, 'pickle'), 'file.pickle')
         self.assertEqual(convert_from_cache_name(filename), 'file')
         filename = 'file'
-        with self.assertRaises(ValueError):
-            convert_from_cache_name(filename, 'pickle')
+        self.assertEqual(convert_from_cache_name(filename), 'file')
