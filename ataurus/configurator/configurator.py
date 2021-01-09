@@ -135,7 +135,7 @@ class Configurator:
         return self._parameters.command
 
     @property
-    def input(self) -> pd.DataFrame:
+    def input(self):
         file = self._parameters.input
 
         # The input file must be csv format because of it will provide safe operations with data
@@ -149,11 +149,14 @@ class Configurator:
             file.close()
             raise ValueError("Data in the input file isn't UTF-8 encoding")
 
+        # Attempt of getting cached data from the special directory
         basename = os.path.basename(file.name)
         if basename in self._cache:
             if self._cache[basename] == get_hash(file.name):
                 with open(os.path.join(CACHE_DIRECTORY, convert_to_cache_name(basename)), 'rb') as file:
-                    return pickle.load(file)
+                    extractor = pickle.load(file)
+                    if isinstance(extractor, FeaturesExtractor):
+                        return extractor
 
         return df
 
