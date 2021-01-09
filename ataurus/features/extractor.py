@@ -44,10 +44,10 @@ class FeaturesExtractor:
         # Sleep for normal printing of message, because of a tqdm's message may be printed earlier than this message
         time.sleep(1)
 
-        tokens = np.array(tokens)
-        sentences = np.array(sentences)
+        tokens = np.array(tokens, dtype=np.object)
+        sentences = np.array(sentences, dtype=np.object)
         if authors is not None:
-            authors = np.array(authors)
+            authors = np.array(authors, dtype=np.object)
 
         all_features = []
         indexes = []
