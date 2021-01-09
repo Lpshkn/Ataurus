@@ -15,7 +15,7 @@ from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cach
 
 
 class Configurator:
-    NAME = 'Ataurus'
+    NAME = 'ataurus'
     DESCRIPTION = 'Ataurus = Attribution of Authorship Russian. ' \
                   'This program collects data from the sites(optional), processes this data, ' \
                   'gets the parameter vector from the data and trains the model of machine learning to specify ' \

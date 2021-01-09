@@ -15,6 +15,6 @@ setup(
     long_description=open(join(dirname(__file__), 'README.md')).read(),
     description=Configurator.DESCRIPTION,
     entry_points={
-        'console_scripts': ['Ataurus = ataurus.main:main']
+        'console_scripts': ['ataurus = ataurus.main:main']
     }
 )
