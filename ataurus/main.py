@@ -21,6 +21,8 @@ def main():
             preparator = Preparator().fit(input_obj)
             extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
             configurator.to_cache(extractor)
+        else:
+            raise TypeError('attempt of processing incorrect data')
 
         if configurator.command == 'train':
             print('FEATURES:\n', extractor.features)
