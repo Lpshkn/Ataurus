@@ -19,8 +19,8 @@ RUN pip3 install -r requirements.txt && locale-gen ru_RU.UTF-8 \
 FROM builder
 MAINTAINER lpshkn
 
-COPY . /Ataurus
-WORKDIR /Ataurus
+COPY . /ataurus
+WORKDIR /ataurus
 
-RUN nosetests --with-coverage --cover-package=ataurus && python3 setup.py install
-ENTRYPOINT ["/bin/bash"]
+RUN python3 setup.py install
+ENTRYPOINT ["ataurus"]
