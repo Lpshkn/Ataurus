@@ -21,11 +21,10 @@ class Model:
         """
         if grid_search:
             param_grid = {
-                'n_estimators': [50, 100, 200, 300],
-                'max_depth': [2, 4, 6, 8, 9],
-                'min_samples_leaf': [1, 2, 3, 4],
-                'criterion': ['gini', 'entropy'],
-                'max_features': ['sqrt', 'log2']
+                'n_estimators': [50, 70, 100],
+                'max_depth': [2, 4, 8],
+                'min_samples_leaf': [1, 2, 4],
+                'criterion': ['gini', 'entropy']
             }
         else:
             param_grid = {
