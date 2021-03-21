@@ -1,4 +1,5 @@
 import elasticsearch
+from database.config import INDEX_SETTINGS
 
 
 class Database:
@@ -25,3 +26,13 @@ class Database:
     @property
     def connection(self):
         return self._es
+
+    def create_index(self, name, /, settings=INDEX_SETTINGS):
+        """
+        Creates an index in the Elasticsearch cluster and passes the settings of initializing index.
+
+        :param name: tha name of index
+        :param settings: the body of request
+        """
+        if not self.connection.indices.exists(name):
+            self.connection.indices.create(index=name, body=settings)
