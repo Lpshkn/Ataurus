@@ -1,5 +1,5 @@
 import elasticsearch
-from database.config import INDEX_SETTINGS
+from database.model import Article
 
 
 class Database:
@@ -19,6 +19,7 @@ class Database:
         database._es = elasticsearch.Elasticsearch(hosts=hosts)
 
         if database._es.ping():
+            Article.init(using=database._es)
             return database
         else:
             raise ConnectionError("The connection to Elasticsearch wasn't made")
@@ -26,13 +27,3 @@ class Database:
     @property
     def connection(self):
         return self._es
-
-    def create_index(self, name, /, settings=INDEX_SETTINGS):
-        """
-        Creates an index in the Elasticsearch cluster and passes the settings of initializing index.
-
-        :param name: tha name of index
-        :param settings: the body of request
-        """
-        if not self.connection.indices.exists(name):
-            self.connection.indices.create(index=name, body=settings)
