@@ -12,6 +12,7 @@ from sklearn.preprocessing import StandardScaler, LabelEncoder
 class FeaturesExtractor:
     def __init__(self):
         self._features = None
+        self._text = None
         self._tokens = None
         self._sentences = None
         self._classes = None
@@ -19,6 +20,7 @@ class FeaturesExtractor:
         self._y = None
 
     def fit(self,
+            texts,
             tokens,
             sentences,
             authors=None,
@@ -26,10 +28,12 @@ class FeaturesExtractor:
             avg_len_sentences=True,
             pos_distribution=True,
             foreign_words_ratio=True,
-            vocabulary_richness=True):
+            vocabulary_richness=True,
+            punctuation_distribution=True):
         """
         Extractor iterates for each text and extracts features like a dict.
         Returns a DataFrame object with columns such as authors and features.
+        :param texts:
         :param tokens: the tokens from the text
         :param sentences: the sentences from the text
         :param authors: a list of authors
@@ -38,6 +42,7 @@ class FeaturesExtractor:
         :param pos_distribution: distribution of part of speech
         :param foreign_words_ratio: foreign words / all words ratio
         :param vocabulary_richness: vocabulary richness
+        :param punctuation_distribution:
         :return: DataFrame object with columns 'Authors' and list of features
         """
         print('Begin extracting features from the data...')
@@ -51,8 +56,8 @@ class FeaturesExtractor:
 
         all_features = []
         indexes = []
-        for _tokens, _sentences in tqdm.tqdm(list(zip(tokens, sentences))):
-            if not _tokens or not _sentences:
+        for _text, _tokens, _sentences in tqdm.tqdm(list(zip(texts, tokens, sentences))):
+            if not _text or not _tokens or not _sentences:
                 indexes.append(False)
                 continue
 
@@ -73,6 +78,8 @@ class FeaturesExtractor:
                 features.update(funcs.pos_distribution(_tokens))
             if vocabulary_richness:
                 features['vocabulary_richness'] = funcs.vocabulary_richness(_tokens)
+            if punctuation_distribution:
+                features.update(funcs.punctuations_distribution(_text))
 
             indexes.append(True)
             all_features.append(features)
