@@ -4,7 +4,7 @@ This module contains functions to extract features from a list of tokens/sentenc
 import pymorphy2
 import re
 from collections import Counter
-from preparing.rules import PUNCTUATIONS
+from ataurus.preparing.rules import PUNCTUATIONS
 from razdel.segmenters.punct import BRACKETS, QUOTES, SMILES
 
 DEFINITIVE_PUNCTS = re.compile(r"(...)|(\?!)|(\?\.{2,3})|(!\.{2,3})|(!!!)|([….?!])")
