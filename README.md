@@ -3,7 +3,7 @@
 - [RUSSIAN version](README.md#Описание)
 - [ENGLISH version](README.md#Description)
 
-# Description
+## Description
 
 The program for recognizing the author of russian texts or articles.
 
@@ -85,11 +85,11 @@ nosetests --with-coverage --cover-package=ataurus
 
 ___
 
-# Описание
+## Описание
 
 Программа для атрибуции текстов.
 
-# Быстрый старт
+## Быстрый старт
 
 Копируем репозиторий:
 
