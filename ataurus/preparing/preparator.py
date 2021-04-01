@@ -36,6 +36,10 @@ class Preparator:
         return self
 
     @property
+    def texts(self):
+        return self._texts
+
+    @property
     def authors(self):
         return self._authors
 

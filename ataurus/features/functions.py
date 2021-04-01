@@ -4,7 +4,14 @@ This module contains functions to extract features from a list of tokens/sentenc
 import pymorphy2
 import re
 from collections import Counter
+from ataurus.preparing.rules import PUNCTUATIONS
+from razdel.segmenters.punct import BRACKETS, QUOTES, SMILES
 
+DEFINITIVE_PUNCTS = re.compile(r"(...)|(\?!)|(\?\.{2,3})|(!\.{2,3})|(!!!)|([….?!])")
+DIVIDING_PUNCTS = re.compile(r"[,;:‑–—−-]")
+HIGHLIGHT_PUNCTS = re.compile(rf'[{BRACKETS}{QUOTES}]')
+SMILES_PUNCTS = re.compile(SMILES)
+DIGITS_PUNCTS = re.compile(r"[+$/*%^]")
 
 # Predefined parts of speech
 POS_FOREIGN = 'FRGN'
@@ -73,3 +80,19 @@ def vocabulary_richness(tokens: list):
         normal_tokens.append(morph.parse(token)[0].normal_form)
     counter = Counter(normal_tokens)
     return len(counter) / len(tokens)
+
+
+def punctuations_distribution(text: str):
+    columns = ["definitive_puncts", "dividing_puncts", "highlight_puncts", "smiles_puncts"]
+    if not text:
+        return dict.fromkeys(columns, 0)
+
+    all_count = len(PUNCTUATIONS.findall(text))
+    distribution = {
+        "definitive_puncts": len(DEFINITIVE_PUNCTS.findall(text)) / all_count if all_count else 0,
+        "dividing_puncts": len(DIVIDING_PUNCTS.findall(text)) / all_count if all_count else 0,
+        "highlight_puncts": len(HIGHLIGHT_PUNCTS.findall(text)) / all_count if all_count else 0,
+        "smiles_puncts": len(SMILES_PUNCTS.findall(text)) / all_count if all_count else 0,
+        "digits_puncts": len(DIGITS_PUNCTS.findall(text)) / all_count if all_count else 0
+    }
+    return distribution

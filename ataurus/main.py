@@ -19,7 +19,7 @@ def main():
             extractor = input_obj
         elif isinstance(input_obj, pd.DataFrame):
             preparator = Preparator().fit(input_obj)
-            extractor = FeaturesExtractor().fit(preparator.tokens(), preparator.sentences(), preparator.authors)
+            extractor = FeaturesExtractor().fit(preparator.texts, preparator.tokens(), preparator.sentences(), preparator.authors)
             configurator.to_cache(extractor)
         else:
             raise TypeError('attempt of processing incorrect data')
