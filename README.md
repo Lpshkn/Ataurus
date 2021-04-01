@@ -94,8 +94,8 @@ ___
 Копируем репозиторий:
 
 ```shell script
-git clone https://gitwork.ru/results/kr-4k/2020-2021/2017-3-10-lep.git ataurus
-cd ataurus/project
+git clone https://github.com/Lpshkn/Ataurus.git ataurus
+cd ataurus
 ```
 
 Запустить pylint можно командой:
