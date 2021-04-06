@@ -1,6 +1,6 @@
 import os
 import unittest
-from ataurus.database.db import Database
+from ataurus.database.client import Database
 
 
 ES_HOST = os.getenv('ES_HOST', 'localhost')
