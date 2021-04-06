@@ -1,5 +1,7 @@
 import elasticsearch
-from database.model import Article
+import pandas as pd
+from elasticsearch_dsl import Search
+from ataurus.utils.constants import AUTHOR_COLUMN, TEXT_COLUMN
 
 
 class Database:
@@ -19,7 +21,6 @@ class Database:
         database._es = elasticsearch.Elasticsearch(hosts=hosts)
 
         if database._es.ping():
-            Article.init(using=database._es)
             return database
         else:
             raise ConnectionError("The connection to Elasticsearch wasn't made")
@@ -27,3 +28,19 @@ class Database:
     @property
     def connection(self):
         return self._es
+
+    def get_texts(self, index: str, author_field: str, text_field: str) -> pd.DataFrame:
+        """
+        Gets all documents from the index of ElasticSearch cluster by its author- and text- fields.
+
+        :param index: the name of index containing documents
+        :param author_field: the name of field containing the name of an author of a document
+        :param text_field: the name of field containing a text of a document
+        :return: pd.DataFrame containing the columns Author and Text
+        """
+        search = Search(index=index, using=self.connection).query("match_all")
+        rows = []
+        for hit in search.scan():
+            rows.append([hit[author_field], hit[text_field]])
+
+        return pd.DataFrame(rows, columns=[AUTHOR_COLUMN, TEXT_COLUMN])
