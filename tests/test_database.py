@@ -1,27 +1,24 @@
-from ataurus.database.db import Database
-from ataurus.database.model import Article
+import os
 import unittest
-import elasticsearch
-import elasticsearch_dsl as es_dsl
+from ataurus.database.db import Database
+
+
+ES_HOST = os.getenv('ES_HOST', 'localhost')
+ES_PORT = os.getenv('ES_PORT', '9200')
 
 
 class DatabaseTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.connection = Database.connect(['localhost:9200']).connection
-
-    def tearDown(self) -> None:
-        self.connection.indices.delete(index=Article.Index.name, ignore=[400, 404])
+        self.correct_host = f'{ES_HOST}:{ES_PORT}'
+        self.incorrect_host = 'wrong'
+        self.db = Database.connect([self.correct_host])
 
     def test_correct_connection(self):
-        self.assertTrue(self.connection.ping())
+        self.assertTrue(self.db.connection.ping())
 
     def test_wrong_connection(self):
         with self.assertRaises(ConnectionError):
-            Database.connect(["wrong_address:9500"])
-
-    def test_creating_index(self):
-        Article.init(using=self.connection)
-        self.assertTrue(self.connection.indices.exists(Article.Index.name))
+            Database.connect([self.incorrect_host])
 
 
 if __name__ == '__main__':
