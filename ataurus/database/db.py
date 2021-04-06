@@ -27,14 +27,14 @@ class Database:
     def connection(self):
         return self._es
 
-    def get_texts(self, index: str, author_field: str, text_field: str) -> tuple[list[str], list[str]]:
+    def get_authors_texts(self, index: str, author_field: str, text_field: str) -> tuple[list[str], list[str]]:
         """
         Gets all documents from the index of ElasticSearch cluster by its author- and text- fields.
 
         :param index: the name of index containing documents
         :param author_field: the name of field containing the name of an author of a document
         :param text_field: the name of field containing a text of a document
-        :return: tuple of <list of authors, list of texts>
+        :return: tuple of list of authors, list of texts
         """
         # Update the index before processing
         self.connection.indices.refresh(index=index)

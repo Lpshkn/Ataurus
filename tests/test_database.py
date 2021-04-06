@@ -26,7 +26,7 @@ class DatabaseTest(unittest.TestCase):
             Database.connect([self.incorrect_host])
 
     def test_get_texts(self):
-        authors, texts = self.db.get_texts(self.test_index, 'author', 'text')
+        authors, texts = self.db.get_authors_texts(self.test_index, 'author', 'text')
         self.assertEqual(authors, ['test'])
         self.assertEqual(texts, ['test'])
 
