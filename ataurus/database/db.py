@@ -1,7 +1,5 @@
 import elasticsearch
-import pandas as pd
 from elasticsearch_dsl import Search
-from ataurus.utils.constants import AUTHOR_COLUMN, TEXT_COLUMN
 
 
 class Database:
@@ -29,18 +27,22 @@ class Database:
     def connection(self):
         return self._es
 
-    def get_texts(self, index: str, author_field: str, text_field: str) -> pd.DataFrame:
+    def get_texts(self, index: str, author_field: str, text_field: str) -> tuple[list[str], list[str]]:
         """
         Gets all documents from the index of ElasticSearch cluster by its author- and text- fields.
 
         :param index: the name of index containing documents
         :param author_field: the name of field containing the name of an author of a document
         :param text_field: the name of field containing a text of a document
-        :return: pd.DataFrame containing the columns Author and Text
+        :return: tuple of <list of authors, list of texts>
         """
-        search = Search(index=index, using=self.connection).query("match_all")
-        rows = []
-        for hit in search.scan():
-            rows.append([hit[author_field], hit[text_field]])
+        # Update the index before processing
+        self.connection.indices.refresh(index=index)
 
-        return pd.DataFrame(rows, columns=[AUTHOR_COLUMN, TEXT_COLUMN])
+        search = Search(index=index, using=self.connection).query("match_all")
+        authors, texts = [], []
+        for hit in search.scan():
+            authors.append(hit[author_field])
+            texts.append(hit[text_field])
+
+        return authors, texts
