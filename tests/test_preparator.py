@@ -5,7 +5,7 @@ from ataurus.preparing.preprocessor import Preprocessor
 
 class PreprocessorTest(unittest.TestCase):
     def setUp(self):
-        self.test_texts = ['ЭТО первый ТЕКСТ', 'Это Второй Тестовый текст', '', 'Прежде был пустой   текст, теперь нет',
+        self.test_texts = ['ЭТО первый ТЕКСТ', 'Это Второй Тестовый Текст', '', 'Прежде был пустой   текст, теперь нет',
                            "РАЗРАБОТЧИКИ?, !$ LinkedIn    \n\n  объявили о появившейся возможности#%^^%!@#$%^&*(? "
                            "https://google.com/"]
 
@@ -21,7 +21,7 @@ class PreprocessorTest(unittest.TestCase):
                          'это первый текст')
         self.assertEqual(Preprocessor.preprocess_text(self.test_texts[1],
                                                       lower=False, delete_whitespace=True, delete_urls=True),
-                         'Это Второй Тестовый текст')
+                         'Это Второй Тестовый Текст')
         self.assertEqual(Preprocessor.preprocess_text(self.test_texts[3],
                                                       lower=False, delete_whitespace=False, delete_urls=True),
                          'Прежде был пустой   текст, теперь нет')
@@ -34,18 +34,34 @@ class PreprocessorTest(unittest.TestCase):
                          " httpsgoogle.com")
 
     def test_tokens_method(self):
-        df = pd.DataFrame([["РАЗРАБОТЧИКИ?, !$ LinkedIn    \n\n  объявили о появившейся возможности#%^^%!@#$%^&*(?"
-                            "https://google.com/", "author"]], columns=['text', 'author'])
-        preprocessor = prep.Preprocessor().fit(df)
-        tokens = preprocessor.tokens(0)
-        self.assertEqual(tokens, [['разработчики', 'linkedin', 'объявили', 'о', 'появившейся', 'возможности']])
+        preprocessor = Preprocessor(self.test_texts)
+        self.assertEqual(preprocessor.tokens(lower=True, normalization=True, remove_stopwords=True),
+                         [['текст'],
+                          ['тестовый', 'текст'],
+                          [],
+                          ['прежде', 'быть', 'пустой', 'текст'],
+                          ['разработчик', 'linkedin', 'объявить', 'появиться', 'возможность']])
 
-        df = pd.DataFrame([["РАЗРАБОТЧИКИ, LinkedIn    \n\n  объявили ? о появившейся возможности!"
-                            "https://google.com/", "author"]], columns=['text', 'author'])
-        preprocessor = prep.Preprocessor().fit(df)
-        tokens = preprocessor.tokens(0, False, False)
-        self.assertEqual(tokens,
-                         [['РАЗРАБОТЧИКИ', ',', 'LinkedIn', 'объявили', '?', 'о', 'появившейся', 'возможности', '!']])
+        self.assertEqual(preprocessor.tokens(lower=False, normalization=True, remove_stopwords=True),
+                         [['текст'],
+                          ['тестовый', 'текст'],
+                          [],
+                          ['прежде', 'быть', 'пустой', 'текст'],
+                          ['разработчик', 'linkedin', 'объявить', 'появиться', 'возможность']])
+
+        self.assertEqual(preprocessor.tokens(lower=False, normalization=False, remove_stopwords=True),
+                         [['ТЕКСТ'],
+                          ['Тестовый', 'Текст'],
+                          [],
+                          ['Прежде', 'был', 'пустой', 'текст'],
+                          ['РАЗРАБОТЧИКИ', 'LinkedIn', 'объявили', 'появившейся', 'возможности']])
+
+        self.assertEqual(preprocessor.tokens(lower=False, normalization=False, remove_stopwords=False),
+                         [['ЭТО', 'первый', 'ТЕКСТ'],
+                          ['Это', 'Второй', 'Тестовый', 'Текст'],
+                          [],
+                          ['Прежде', 'был', 'пустой', 'текст', 'теперь', 'нет'],
+                          ['РАЗРАБОТЧИКИ', 'LinkedIn', 'объявили', 'о', 'появившейся', 'возможности']])
 
     def test_sentences_method(self):
         df = pd.DataFrame([["Это расширение. Было!? Анонсировано в! Рамках продолжения политики LinkedIn. "
