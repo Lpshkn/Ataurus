@@ -1,7 +1,7 @@
 import sys
 import ataurus.configurator.configurator as cfg
 import pandas as pd
-from ataurus.preparing.preparator import Preparator
+from ataurus.preparing.preprocessor import Preprocessor
 from ataurus.features.extractor import FeaturesExtractor
 from ataurus.ml.model import Model
 
@@ -18,8 +18,8 @@ def main():
         if isinstance(input_obj, FeaturesExtractor):
             extractor = input_obj
         elif isinstance(input_obj, pd.DataFrame):
-            preparator = Preparator().fit(input_obj)
-            extractor = FeaturesExtractor().fit(preparator.texts, preparator.tokens(), preparator.sentences(), preparator.authors)
+            preprocessor = Preprocessor()
+            extractor = FeaturesExtractor().fit(preprocessor.texts, preprocessor.tokens(), preprocessor.sentences(), preprocessor.authors)
             configurator.to_cache(extractor)
         else:
             raise TypeError('attempt of processing incorrect data')
