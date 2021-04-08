@@ -109,4 +109,5 @@ class Preprocessor:
             text = re.sub(r'[\s]+', r' ', text).strip()
         if delete_urls:
             text = URLS.sub('', text)
-        return text
+
+        return text.strip()
