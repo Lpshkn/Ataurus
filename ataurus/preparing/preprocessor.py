@@ -5,7 +5,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 """
 import re
 from razdel import tokenize, sentenize
-from .rules import PUNCTUATIONS, URLS
+from .rules import PUNCTUATIONS, URLS, STOPWORDS
 from pymorphy2 import MorphAnalyzer
 
 
@@ -16,14 +16,14 @@ class Preprocessor:
     def tokens(self,
                lower=True,
                normalization=True,
-               remove_stopwords=True) -> list[str]:
+               remove_stopwords=True) -> list[list[str]]:
         """
         Get a list of tokens from the text received by the index from the DataFrame.
 
         :param lower: to lower a result
         :param normalization: normalize each token in the sentence
         :param remove_stopwords: remove stopwords from the tokens
-        :return: a list of tokens
+        :return: a list of lists of tokens for an each passed text
         """
         results = []
         morph = MorphAnalyzer()
@@ -31,12 +31,21 @@ class Preprocessor:
         for text in self.texts:
             preprocessed_text = self.preprocess_text(text, lower=lower, delete_whitespace=True, delete_urls=True)
 
-            # If not PUNCTUATIONS - removes punctuations from a list of tokens
+            # Nested conditions - it's faster than make it separately
             if normalization:
-                tokens = [morph.parse(token.text)[0].normal_form for token in tokenize(preprocessed_text)
-                          if not PUNCTUATIONS.match(token.text)]
+                if remove_stopwords:
+                    tokens = [normal_form for token in tokenize(preprocessed_text)
+                              if not PUNCTUATIONS.match(token.text)
+                              and not STOPWORDS.match((normal_form := morph.parse(token.text)[0].normal_form))]
+                else:
+                    tokens = [morph.parse(token.text)[0].normal_form for token in tokenize(preprocessed_text)
+                              if not PUNCTUATIONS.match(token.text)]
             else:
-                tokens = [token.text for token in tokenize(preprocessed_text) if not PUNCTUATIONS.match(token.text)]
+                if remove_stopwords:
+                    tokens = [token.text for token in tokenize(preprocessed_text)
+                              if not PUNCTUATIONS.match(token.text) and not STOPWORDS.match(token.text)]
+                else:
+                    tokens = [token.text for token in tokenize(preprocessed_text) if not PUNCTUATIONS.match(token.text)]
 
             results.append(tokens)
 
