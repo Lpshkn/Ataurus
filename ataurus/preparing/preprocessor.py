@@ -21,7 +21,7 @@ class Preprocessor:
         Get a list of tokens from the text received by the index from the DataFrame.
 
         :param lower: to lower a result
-        :param normalization: normalize each token in the sentence
+        :param normalization: normalize each token in the sentence, each word is transformed to lower case
         :param remove_stopwords: remove stopwords from the tokens
         :return: a list of lists of tokens for an each passed text
         """
