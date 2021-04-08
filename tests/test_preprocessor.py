@@ -1,5 +1,4 @@
 import unittest.mock
-import pandas as pd
 from ataurus.preparing.preprocessor import Preprocessor
 
 
@@ -8,6 +7,9 @@ class PreprocessorTest(unittest.TestCase):
         self.test_texts = ['ЭТО первый ТЕКСТ', 'Это Второй Тестовый Текст', '', 'Прежде был пустой   текст, теперь нет',
                            "РАЗРАБОТЧИКИ?, !$ LinkedIn    \n\n  объявили о появившейся возможности#%^^%!@#$%^&*(? "
                            "https://google.com/"]
+
+        self.test_sentences_texts = ['Это первый текст. И. Первое предложение. РИАЛИ.', '', 'ВТОРОЕ #$$%$& '
+                                     'предложение. This https://lpshkn.xyz/ ЭТО! Сайт не!? мой.']
 
     def tearDown(self):
         pass
@@ -64,10 +66,13 @@ class PreprocessorTest(unittest.TestCase):
                           ['РАЗРАБОТЧИКИ', 'LinkedIn', 'объявили', 'о', 'появившейся', 'возможности']])
 
     def test_sentences_method(self):
-        df = pd.DataFrame([["Это расширение. Было!? Анонсировано в! Рамках продолжения политики LinkedIn. "
-                            "О непрерывности,%;%:%* профессионального.", "author"]], columns=['text', 'author'])
-        preprocessor = prep.Preprocessor().fit(df)
-        sentences = preprocessor.sentences(0, True, True)
-        self.assertEqual(sentences,
-                         [['это расширение', 'было', 'анонсировано в', 'рамках продолжения политики linkedin',
-                           'о непрерывности профессионального']])
+        preprocessor = Preprocessor(self.test_sentences_texts)
+        self.assertEqual(preprocessor.sentences(lower=True, normalization=True, remove_stopwords=True),
+                         [['это первый текст', 'и первое предложение', 'риали'],
+                          [],
+                          ['второе предложение', 'this это', 'сайт не мой']])
+
+        self.assertEqual(preprocessor.sentences(lower=False, normalization=True, remove_stopwords=True),
+                         [['Это первый текст', 'И Первое предложение', 'РИАЛИ'],
+                          [],
+                          ['ВТОРОЕ предложение', 'This ЭТО', 'Сайт не мой']])
