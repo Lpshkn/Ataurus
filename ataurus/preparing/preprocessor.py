@@ -18,7 +18,7 @@ class Preprocessor:
                normalization=True,
                remove_stopwords=True) -> list[list[str]]:
         """
-        Get a list of tokens from the text received by the index from the DataFrame.
+        Get a list of tokens from a passed text.
 
         :param lower: to lower a result
         :param normalization: normalize each token in the sentence, each word is transformed to lower case
@@ -52,38 +52,26 @@ class Preprocessor:
         return results
 
     def sentences(self,
-                  index: int = None,
                   lower=True,
-                  delete_punctuations=True) -> list:
+                  normalization=True,
+                  remove_stopwords=True) -> list[list[str]]:
         """
-        Get a list of sentences from the text received by the index from the DataFrame.
+        Get a list of sentences from a passed text.
 
-        :param index: index of a text of the DataFrame that you want to process.
-                      If it's None, all the texts will be processed.
         :param lower: to lower a result
-        :param delete_punctuations: delete all punctuations from a result
-        :return: list - the list of sentences
+        :return: a list of lists of sentences for an each passed text
         """
         results = []
-        if index is None:
-            index = range(len(self._texts))
-        else:
-            if not isinstance(index, int):
-                raise TypeError("The index that you want to use to get a text isn't int!")
-            index = [index]
 
-        for i in index:
-            text = self._process_text(i, lower=False, delete_whitespace=False, delete_urls=True)
-            if not text:
-                continue
+        for text in self.texts:
+            preprocessed_text = self.preprocess_text(text, lower=False, delete_whitespace=False, delete_urls=True)
 
             if lower:
-                sentences = [sentence.text.lower() for sentence in sentenize(text)]
+                sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence.text.lower())).strip()
+                             for sentence in sentenize(preprocessed_text)]
             else:
-                sentences = [sentence.text for sentence in sentenize(text)]
-
-            if delete_punctuations:
-                sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence)).strip() for sentence in sentences]
+                sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence.text)).strip()
+                             for sentence in sentenize(preprocessed_text)]
 
             results.append(sentences)
 
