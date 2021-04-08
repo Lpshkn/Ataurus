@@ -1,45 +1,39 @@
 import unittest.mock
 import pandas as pd
-import ataurus.preparing.preprocessor as prep
+from ataurus.preparing.preprocessor import Preprocessor
 
 
-class preprocessorTest(unittest.TestCase):
+class PreprocessorTest(unittest.TestCase):
     def setUp(self):
-        pass
+        self.test_texts = ['ЭТО первый ТЕКСТ', 'Это Второй Тестовый текст', '', 'Прежде был пустой текст, теперь нет']
 
     def tearDown(self):
         pass
 
-    def test_incorrect_type_data(self):
-        with self.assertRaises(TypeError):
-            prep.preprocessor().fit([])
+    def test_preprocess_text(self):
+        texts = ["РАЗРАБОТЧИКИ LinkedIn    \n\n  объявили о появившейся возможности", "https://google.com/", "author"]
 
-    def test_no_columnname_data(self):
-        df = pd.DataFrame([1, 2, 3])
-        with self.assertRaises(KeyError):
-            prep.Preprocessor().fit(df)
-
-    def test_process_text_method(self):
-        df = pd.DataFrame([["РАЗРАБОТЧИКИ LinkedIn    \n\n  объявили о появившейся возможности"
-                           "https://google.com/", "author"]], columns=['text', 'author'])
-        preprocessor = prep.Preprocessor().fit(df)
-        processed = preprocessor._process_text(0)
-        self.assertEqual(processed, 'разработчики linkedin объявили о появившейся возможности')
-
-        df = pd.DataFrame([[1, 'aa'], [2, 'bb'], [3, 'cc']], columns=['text', 'author'])
-        preprocessor = prep.Preprocessor().fit(df)
-        with self.assertRaises(TypeError):
-            preprocessor._process_text(0)
+        self.assertEqual(Preprocessor.preprocess_text(texts[0]),
+                         'разработчики linkedin объявили о появившейся возможности')
+        self.assertEqual(Preprocessor.preprocess_text(texts[1]), '')
+        self.assertEqual(Preprocessor.preprocess_text(texts[2]), 'author')
+        self.assertEqual(Preprocessor.preprocess_text(self.test_texts[2]), '')
+        self.assertEqual(Preprocessor.preprocess_text("РАЗРАБОТЧИКИ LinkedIn", lower=False), 'РАЗРАБОТЧИКИ LinkedIn')
+        self.assertEqual(Preprocessor.preprocess_text(texts[0], lower=False, delete_whitespace=False), texts[0])
+        self.assertEqual(Preprocessor.preprocess_text(texts[0] + ' ' + texts[1], lower=False, delete_whitespace=False),
+                         texts[0])
+        self.assertEqual(Preprocessor.preprocess_text(texts[0] + ' ' + texts[1], lower=False, delete_whitespace=False,
+                                                      delete_urls=False), texts[0] + ' ' + texts[1])
 
     def test_tokens_method(self):
         df = pd.DataFrame([["РАЗРАБОТЧИКИ?, !$ LinkedIn    \n\n  объявили о появившейся возможности#%^^%!@#$%^&*(?"
-                           "https://google.com/", "author"]], columns=['text', 'author'])
+                            "https://google.com/", "author"]], columns=['text', 'author'])
         preprocessor = prep.Preprocessor().fit(df)
         tokens = preprocessor.tokens(0)
         self.assertEqual(tokens, [['разработчики', 'linkedin', 'объявили', 'о', 'появившейся', 'возможности']])
 
         df = pd.DataFrame([["РАЗРАБОТЧИКИ, LinkedIn    \n\n  объявили ? о появившейся возможности!"
-                           "https://google.com/", "author"]], columns=['text', 'author'])
+                            "https://google.com/", "author"]], columns=['text', 'author'])
         preprocessor = prep.Preprocessor().fit(df)
         tokens = preprocessor.tokens(0, False, False)
         self.assertEqual(tokens,
@@ -47,7 +41,7 @@ class preprocessorTest(unittest.TestCase):
 
     def test_sentences_method(self):
         df = pd.DataFrame([["Это расширение. Было!? Анонсировано в! Рамках продолжения политики LinkedIn. "
-                           "О непрерывности,%;%:%* профессионального.", "author"]], columns=['text', 'author'])
+                            "О непрерывности,%;%:%* профессионального.", "author"]], columns=['text', 'author'])
         preprocessor = prep.Preprocessor().fit(df)
         sentences = preprocessor.sentences(0, True, True)
         self.assertEqual(sentences,
