@@ -68,10 +68,10 @@ class Preprocessor:
 
             if lower:
                 sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence.text.lower())).strip()
-                             for sentence in sentenize(preprocessed_text)]
+                             for sentence in sentenize(preprocessed_text) if sentence.text]
             else:
                 sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence.text)).strip()
-                             for sentence in sentenize(preprocessed_text)]
+                             for sentence in sentenize(preprocessed_text) if sentence.text]
 
             results.append(sentences)
 
