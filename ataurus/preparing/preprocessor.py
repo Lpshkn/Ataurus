@@ -95,7 +95,7 @@ class Preprocessor:
                         delete_whitespace=True,
                         delete_urls=True) -> str:
         """
-        Process the text depending on specified options.
+        Processes the text depending on specified options. Remove incorrect symbols except of: , . ! ? " -
 
         :param text: a text that will be processed
         :param lower: to lower a result
@@ -109,5 +109,7 @@ class Preprocessor:
             text = re.sub(r'[\s]+', r' ', text).strip()
         if delete_urls:
             text = URLS.sub('', text)
+
+        text = re.sub(r'[%№@#$^&*)(_=+/\\|~`\[\]}{:;]', '', text)
 
         return text.strip()
