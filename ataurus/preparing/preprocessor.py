@@ -11,7 +11,7 @@ from pymorphy2 import MorphAnalyzer
 
 class Preprocessor:
     def __init__(self, texts: list[str]):
-        self.texts = texts
+        self._texts = texts
 
     def tokens(self,
                lower=True,
@@ -28,7 +28,7 @@ class Preprocessor:
         results = []
         morph = MorphAnalyzer()
 
-        for text in self.texts:
+        for text in self._texts:
             preprocessed_text = self.preprocess_text(text, lower=lower, delete_whitespace=True, delete_urls=True)
 
             # Nested conditions - it's faster than make it separately
@@ -63,7 +63,7 @@ class Preprocessor:
         """
         results = []
 
-        for text in self.texts:
+        for text in self._texts:
             preprocessed_text = self.preprocess_text(text, lower=False, delete_whitespace=False, delete_urls=True)
 
             if lower:
@@ -76,6 +76,9 @@ class Preprocessor:
             results.append(sentences)
 
         return results
+
+    def texts(self):
+        return self._texts
 
     @staticmethod
     def preprocess_text(text: str,
