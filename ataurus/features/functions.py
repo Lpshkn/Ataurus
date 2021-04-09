@@ -3,6 +3,7 @@ This module contains functions to extract features from a list of tokens/sentenc
 """
 import pymorphy2
 import re
+import numpy as np
 from collections import Counter
 from ataurus.preparing.rules import PUNCTUATIONS
 from razdel.segmenters.punct import BRACKETS, QUOTES, SMILES
@@ -25,17 +26,17 @@ FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
 def avg_len_words(tokens: list):
     """Feature №10. Average length of words."""
     if not tokens:
-        return None
+        return np.nan
 
-    return sum(len(token) for token in tokens) / len(tokens)
+    return sum(map(len, tokens)) / len(tokens)
 
 
 def avg_len_sentences(sentences: list):
     """Feature №11. Average length of sentences."""
     if not sentences:
-        return None
+        return np.nan
 
-    return sum(len(sentence) for sentence in sentences) / len(sentences)
+    return sum(map(len, sentences)) / len(sentences)
 
 
 def pos_distribution(tokens: list) -> dict:
