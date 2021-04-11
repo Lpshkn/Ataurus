@@ -23,20 +23,21 @@ POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH) + [POS_FOREIGN, P
 FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
 
 
-def avg_len_words(tokens: list):
-    """Feature №10. Average length of words."""
-    if not tokens:
-        return np.nan
+def avg_length(items: list[list[str]]):
+    """
+    Function to get average length of tokens and sentences.
 
-    return sum(map(len, tokens)) / len(tokens)
+    :param items: a list of lists of tokens/sentences
+    :return: a list of average lengths of tokens/sentences
+    """
+    result = []
+    for items_ in items:
+        if not items_:
+            result.append(np.nan)
+        else:
+            result.append(sum(map(len, items_)) / len(items_))
 
-
-def avg_len_sentences(sentences: list):
-    """Feature №11. Average length of sentences."""
-    if not sentences:
-        return np.nan
-
-    return sum(map(len, sentences)) / len(sentences)
+    return np.array(result).reshape(-1, 1)
 
 
 def pos_distribution(tokens: list) -> dict:
