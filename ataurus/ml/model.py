@@ -4,11 +4,12 @@ from sklearn.model_selection import GridSearchCV
 import pickle
 
 
-class Model:
-    def __init__(self):
-        self.estimator = None
-        self.best_score = None
-        self.best_params = None
+class Model(BaseEstimator, ClassifierMixin):
+    def __init__(self, estimator):
+        """
+        :param estimator: estimator can be 'RandomForest', 'SVM'.
+        """
+        self.estimator = estimator
 
     def fit(self, X, y, grid_search=True, cv=5):
         """
