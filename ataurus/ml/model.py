@@ -1,7 +1,7 @@
-from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-import pickle
+from sklearn.svm import SVC
+from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.metrics import f1_score
 
 
 class Model(BaseEstimator, ClassifierMixin):
@@ -11,38 +11,29 @@ class Model(BaseEstimator, ClassifierMixin):
         """
         self.estimator = estimator
 
-    def fit(self, X, y, grid_search=True, cv=5):
+    def fit(self, X, y=None):
         """
         Fit the model.
         :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
         :param y: ndarray of shape (n_samples,) Target values.
-        :param cv: cross-validation classes
-        :param grid_search: if it's true, the grid search will be performed
         :return: self
         """
-        if grid_search:
-            param_grid = {
-                'n_estimators': [50, 70, 100],
-                'max_depth': [2, 4, 8],
-                'min_samples_leaf': [1, 2, 4],
-                'criterion': ['gini', 'entropy']
-            }
+        if self.estimator == 'RandomForest':
+            self.estimator = RandomForestClassifier()
+        elif self.estimator == 'SVM':
+            self.estimator = SVC()
         else:
-            param_grid = {
-                'n_estimators': [100]
-            }
+            raise ValueError('You chosen an incorrect estimator')
 
-        print('Begin searching the best hyper parameters of the model...')
-        clf = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs=-1, verbose=1, cv=cv)
-        clf.fit(X, y)
-        self.estimator = clf.best_estimator_
-        self.best_score = clf.best_score_
-        self.best_params = clf.best_params_
-        print('Best score of the model: ', clf.best_score_)
-        print('Best estimator: ', clf.best_estimator_)
-        print('Best parameters: ')
-        for param, value in self.best_params.items():
-            print(f'\t{param}:', value)
+        if isinstance(X, tuple):
+            train, targets = X
+        else:
+            if y is None:
+                raise ValueError('y is None')
+            train = X
+            targets = y
+
+        return self.estimator.fit(train, targets)
 
     def predict(self, X):
         """
