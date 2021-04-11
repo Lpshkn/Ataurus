@@ -36,34 +36,7 @@ class Model(BaseEstimator, ClassifierMixin):
         return self.estimator.fit(train, targets)
 
     def predict(self, X):
-        """
-        Predict targets.
-        :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
-        :return: predicted targets
-        """
-        if not self.estimator:
-            raise ValueError("The model wasn't fitted, so it can't predict labels")
-
-        X = StandardScaler().fit_transform(X)
         return self.estimator.predict(X)
 
-    def save(self, name: str):
-        """
-        Save the model into the .pickle file.
-        :param name: the name of the file
-        """
-        if not self.estimator:
-            raise ValueError("The model wasn't fitted, so it can't be saved")
-
-        with open(name, 'wb') as file:
-            pickle.dump(self, file)
-
-    def info(self):
-        if not self.estimator:
-            raise ValueError("The model wasn't fitted, so it hasn't any information")
-
-        print('Estimator:', self.estimator.__class__.__name__)
-        print('Best score:', self.best_score)
-        print('Parameters:')
-        for param, value in self.best_params.items():
-            print(f'\t{param}:', value)
+    def score(self, X, y, sample_weight=None):
+        return f1_score(y, self.predict(X), sample_weight=sample_weight)
