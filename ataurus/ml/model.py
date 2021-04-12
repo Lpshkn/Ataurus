@@ -1,7 +1,9 @@
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import f1_score
+from sklearn.impute import SimpleImputer
 
 
 class Model(BaseEstimator, ClassifierMixin):
@@ -13,7 +15,7 @@ class Model(BaseEstimator, ClassifierMixin):
         self.estimator = estimator
         self.remove_nan = remove_nan
 
-    def fit(self, X, y=None):
+    def fit(self, X, y):
         """
         Fit the model.
         :param X: {array-like, sparse matrix, dataframe} of shape (n_samples, n_features)
@@ -27,15 +29,18 @@ class Model(BaseEstimator, ClassifierMixin):
         else:
             raise ValueError('You chosen an incorrect estimator')
 
-        if isinstance(X, tuple):
-            train, targets = X
-        else:
-            if y is None:
-                raise ValueError('y is None')
-            train = X
-            targets = y
+        # Return digit-view of y
+        self.classes_, y = np.unique(y, return_inverse=True)
 
-        return self.estimator.fit(train, targets)
+        if self.remove_nan:
+            # Find rows having at least 1 np.nan value in its columns
+            indexes = ~np.isnan(X).any(axis=1)
+            X = X[indexes]
+            y = y[indexes]
+        else:
+            X = SimpleImputer().fit_transform(X)
+
+        return self.estimator.fit(X, y)
 
     def predict(self, X):
         return self.estimator.predict(X)
