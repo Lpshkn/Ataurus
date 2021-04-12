@@ -54,18 +54,13 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
 
         result = None
         if self.avg_words:
-            result = np.hstack((result, funcs.avg_length(tokens))) if result else funcs.avg_length(tokens)
+            result = np.hstack((result, funcs.avg_length(self.tokens))) if result is not None \
+                else funcs.avg_length(self.tokens)
         if self.avg_sentences:
-            result = np.hstack((result, funcs.avg_length(sentences))) if result else funcs.avg_length(sentences)
+            result = np.hstack((result, funcs.avg_length(self.sentences))) if result is not None \
+                else funcs.avg_length(self.sentences)
 
-        if y:
-            le = LabelEncoder()
-            le.fit(y)
-            self._classes = le.classes_
-            targets = le.transform(y)
-            return result, targets
-        else:
-            return result
+        return result
 
     def _retrieve_lists(self, X):
         """
