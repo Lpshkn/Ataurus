@@ -33,6 +33,26 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         self.punctuation_distribution = punctuation_distribution
 
     def fit(self, X, y=None):
+        """
+        Retrieve lists of texts, tokens and sentences from np.ndarray X. The list of texts must be the first column,
+        the list of tokens - the second column and sentences - the third column.
+
+        If all the values in tokens or sentences are None, Extractor gets tokens or sentences from the list of texts.
+        """
+        texts = X[:, 0]
+        tokens = X[:, 1]
+        sentences = X[:, 2]
+
+        preprocessor = Preprocessor(texts)
+        if not any(tokens):
+            tokens = preprocessor.tokens()
+        if not any(sentences):
+            sentences = preprocessor.sentences()
+
+        self.texts = preprocessor.texts()
+        self.tokens = preprocessor.tokens()
+        self.sentences = preprocessor.sentences()
+
         return self
 
     def transform(self, X: dict, y=None):
