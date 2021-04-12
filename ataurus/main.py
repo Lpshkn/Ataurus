@@ -1,37 +1,46 @@
 import sys
 import ataurus.configurator.configurator as cfg
-import pandas as pd
+import numpy as np
 from ataurus.preparing.preprocessor import Preprocessor
 from ataurus.features.extractor import FeaturesExtractor
+from ataurus.database.client import Database
 from ataurus.ml.model import Model
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
 
 
 def main():
-    configurator = cfg.Configurator(sys.argv[1:])
+    # configurator = cfg.Configurator(sys.argv[1:])
+    database = Database.connect(['localhost:9200'])
+    authors, texts = database.get_authors_texts('articles_5ath', 'author_nickname', 'text')
+    preprocessor = Preprocessor(texts)
 
-    if configurator.command == 'info':
-        model = configurator.model
-        model.info()
-    else:
-        input_obj = configurator.input
+    pipeline = Pipeline([
+        ('extracting', FeaturesExtractor()),
+        ('scaler', StandardScaler()),
+        ('model', Model())
+    ])
 
-        if isinstance(input_obj, FeaturesExtractor):
-            extractor = input_obj
-        elif isinstance(input_obj, pd.DataFrame):
-            preprocessor = Preprocessor()
-            extractor = FeaturesExtractor().fit(preprocessor.texts, preprocessor.tokens(), preprocessor.sentences(), preprocessor.authors)
-            configurator.to_cache(extractor)
-        else:
-            raise TypeError('attempt of processing incorrect data')
+    param_grid = [
+        {'extracting__avg_words': [True, False],
+         'extracting__avg_sentences': [True, False],
+#         'extracting__pos_distribution': [True, False],
+#         'extracting__foreign_words_ratio': [True, False],
+#         'extracting__vocabulary_richness': [True, False],
+#         'extracting__punctuation_distribution': [True, False],
+         'model__remove_nan': [True, False],
+         'model__estimator': ['RandomForest', 'SVM']}
+    ]
+    texts = preprocessor.texts()
+    grid_search = GridSearchCV(pipeline, param_grid, n_jobs=-1, cv=2)
+    grid_search.fit(np.c_[texts, np.full(len(texts), None), np.full(len(texts), None)], np.array(authors).ravel())
+    grid_search
 
-        if configurator.command == 'train':
-            print('FEATURES:\n', extractor.features)
-            model = Model()
-            model.fit(extractor.X, extractor.y)
-            model.save(configurator.output_file)
-        elif configurator.command == 'predict':
-            model = configurator.model
-            print('Predictions:', model.predict(extractor.X))
+#    if configurator.command == 'train':
+#        pass
+#    elif configurator.command == 'predict':
+#        pass
 
 
 if __name__ == '__main__':
