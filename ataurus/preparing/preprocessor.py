@@ -11,7 +11,7 @@ from pymorphy2 import MorphAnalyzer
 
 class Preprocessor:
     def __init__(self, texts: list[str]):
-        if not texts:
+        if not any(texts):
             raise ValueError("A list of texts is incorrect: it's may be None or empty")
         self._texts = texts
 
