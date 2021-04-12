@@ -43,6 +43,34 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         Note, if both the list of tokens and sentences are None, the list of texts will be retrieved from
         the Preprocessor too, because of the Extractor guesses the passed texts are unprocessed.
         """
+        self._retrieve_lists(X)
+        return self
+
+    def transform(self, X):
+        # If at least one attribute doesn't exist, this specifies the fit method wasn't called
+        # and all the retrieves must be executed
+        if not hasattr(self, 'texts') or not hasattr(self, 'tokens') or not hasattr(self, 'sentences'):
+            self._retrieve_lists(X)
+
+        result = None
+        if self.avg_words:
+            result = np.hstack((result, funcs.avg_length(tokens))) if result else funcs.avg_length(tokens)
+        if self.avg_sentences:
+            result = np.hstack((result, funcs.avg_length(sentences))) if result else funcs.avg_length(sentences)
+
+        if y:
+            le = LabelEncoder()
+            le.fit(y)
+            self._classes = le.classes_
+            targets = le.transform(y)
+            return result, targets
+        else:
+            return result
+
+    def _retrieve_lists(self, X):
+        """
+        Makes all retrieves described in the fit method.
+        """
         texts = X[:, 0]
         tokens = X[:, 1]
         sentences = X[:, 2]
@@ -60,35 +88,6 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         self.texts = texts
         self.tokens = tokens
         self.sentences = sentences
-
-        return self
-
-    def transform(self, X: dict, y=None):
-        tokens = X['tokens']
-        sentences = X['sentences']
-        texts = X['texts']
-
-        if tokens is None:
-            preprocessor = Preprocessor(texts)
-            tokens = preprocessor.tokens()
-        if sentences is None:
-            preprocessor = Preprocessor(texts)
-            sentences = preprocessor.sentences()
-
-        result = None
-        if self.avg_words:
-            result = np.hstack((result, funcs.avg_length(tokens))) if result else funcs.avg_length(tokens)
-        if self.avg_sentences:
-            result = np.hstack((result, funcs.avg_length(sentences))) if result else funcs.avg_length(sentences)
-
-        if y:
-            le = LabelEncoder()
-            le.fit(y)
-            self._classes = le.classes_
-            targets = le.transform(y)
-            return result, targets
-        else:
-            return result
 
     @property
     def classes(self):
