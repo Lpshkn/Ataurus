@@ -5,11 +5,13 @@ from sklearn.metrics import f1_score
 
 
 class Model(BaseEstimator, ClassifierMixin):
-    def __init__(self, estimator):
+    def __init__(self, estimator='RandomForest', remove_nan=True):
         """
         :param estimator: estimator can be 'RandomForest', 'SVM'.
+        :param remove_nan: remove np.nan values from X
         """
         self.estimator = estimator
+        self.remove_nan = remove_nan
 
     def fit(self, X, y=None):
         """
