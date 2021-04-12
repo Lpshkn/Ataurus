@@ -3,6 +3,7 @@ Module represents a class that will process data to extract a matrix of features
 """
 import numpy as np
 import ataurus.features.functions as funcs
+import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.preparing.preprocessor import Preprocessor
 
@@ -55,6 +56,10 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         if self.avg_sentences:
             result = np.hstack((result, funcs.avg_length(self.sentences))) if result is not None \
                 else funcs.avg_length(self.sentences)
+        if result is None:
+            warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
+                          "average length of words will be set True automatically.")
+            result = funcs.avg_length(self.tokens)
 
         return result
 
