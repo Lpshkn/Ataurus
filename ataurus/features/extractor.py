@@ -1,13 +1,9 @@
 """
-Module represents a class that will process data to extract a vector of features from it.
+Module represents a class that will process data to extract a matrix of features from it.
 """
 import numpy as np
-import pandas as pd
 import ataurus.features.functions as funcs
-import tqdm
-import time
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 from ataurus.preparing.preprocessor import Preprocessor
 
 
@@ -83,10 +79,3 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         self.texts = texts
         self.tokens = tokens
         self.sentences = sentences
-
-    @property
-    def classes(self):
-        if hasattr(self, '_classes'):
-            return self._classes
-        else:
-            return None
