@@ -71,17 +71,14 @@ def foreign_words_ratio(tokens: list):
     return len(foreign) / len(tokens)
 
 
-def vocabulary_richness(tokens: list):
+def vocabulary_richness(tokens: list[list[str]]) -> np.ndarray:
     """Feature №17. Vocabulary richness."""
-    if not tokens:
-        return None
+    result = []
 
-    morph = pymorphy2.MorphAnalyzer()
-    normal_tokens = []
-    for token in tokens:
-        normal_tokens.append(morph.parse(token)[0].normal_form)
-    counter = Counter(normal_tokens)
-    return len(counter) / len(tokens)
+    for tokens_ in tokens:
+        result.append(np.unique(tokens_) / len(tokens_))
+
+    return np.array(result).reshape(-1, 1)
 
 
 def punctuations_distribution(text: str):
