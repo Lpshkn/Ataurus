@@ -15,15 +15,13 @@ SMILES_PUNCTS = re.compile(SMILES)
 DIGITS_PUNCTS = re.compile(r"[+$/*%^]")
 
 # Predefined parts of speech
-POS_FOREIGN = 'FRGN'
-POS_NONE = 'NONE'
-POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH) + [POS_FOREIGN, POS_NONE]
+POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH)
 
 # Compiled regex for foreign words
 FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
 
 
-def avg_length(items: list[list[str]]):
+def avg_length(items: list[list[str]]) -> np.array:
     """
     Function to get average length of tokens and sentences.
 
@@ -40,26 +38,28 @@ def avg_length(items: list[list[str]]):
     return np.array(result).reshape(-1, 1)
 
 
-def pos_distribution(tokens: list) -> dict:
+def pos_distribution(tokens: list[list[str]]) -> np.array:
     """Feature №8. Part of speech distribution."""
     morph = pymorphy2.MorphAnalyzer()
-    distribution = dict.fromkeys(POS, 0)
 
-    for token in tokens:
-        pos = morph.parse(token)[0].tag.POS
-        if pos in distribution:
-            distribution[pos] += 1
-        # If the word is foreign
-        elif FOREIGN_WORD.search(token):
-            distribution[POS_FOREIGN] += 1
-        # If the pos can't be determined
-        else:
-            distribution[POS_NONE] += 1
+    # The final matrix of distributions
+    result = []
 
-    summary = sum(distribution.values())
-    distribution = {first: second / summary for first, second in distribution.items()}
+    # tokens_ - a list of tokens of one text in a list of texts
+    for tokens_ in tokens:
+        # result_ - a list of POS of one text in a list of texts
+        result_ = []
+        # Get a list of POS of a passed text
+        pos_tokens = list(pos for pos in map(lambda x: morph.parse(x)[0].tag.POS, tokens_) if pos is not None)
+        counter = Counter(pos_tokens)
+        all_count = sum(counter.values())
 
-    return distribution
+        # Make a list of distributions using predefined pymorphy2 POS labels. If a POS label isn't in Counter, put 0
+        for pos in POS:
+            result_.append(counter.get(pos, 0) / all_count)
+        result.append(result_)
+
+    return np.array(result)
 
 
 def foreign_words_ratio(tokens: list):
