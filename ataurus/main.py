@@ -6,7 +6,7 @@ from ataurus.features.extractor import FeaturesExtractor
 from ataurus.database.client import Database
 from ataurus.ml.model import Model
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.model_selection import GridSearchCV
 
 
@@ -23,18 +23,24 @@ def main():
     ])
 
     param_grid = [
-        {'extracting__avg_words': [True, False],
+        {'extracting__avg_words': [True],
          'extracting__avg_sentences': [True, False],
-#         'extracting__pos_distribution': [True, False],
+         'extracting__pos_distribution': [True, False],
 #         'extracting__foreign_words_ratio': [True, False],
-#         'extracting__vocabulary_richness': [True, False],
+         'extracting__vocabulary_richness': [True, False],
 #         'extracting__punctuation_distribution': [True, False],
          'model__remove_nan': [True, False],
          'model__estimator': ['RandomForest', 'SVM']}
     ]
-    texts = preprocessor.texts()
+    texts = np.array(preprocessor.texts(), dtype=object)
+    tokens = np.array(preprocessor.tokens(), dtype=object)
+    sentences = np.array(preprocessor.sentences(), dtype=object)
+    X = np.c_[texts, tokens, sentences]
+
     grid_search = GridSearchCV(pipeline, param_grid, n_jobs=-1, cv=2)
-    grid_search.fit(np.c_[texts, np.full(len(texts), None), np.full(len(texts), None)], np.array(authors).ravel())
+
+    #grid_search.fit(np.c_[texts, np.full(len(texts), None), np.full(len(texts), None)], np.array(authors).ravel())
+    grid_search.fit(X, np.array(authors).ravel())
     grid_search
 
 #    if configurator.command == 'train':
