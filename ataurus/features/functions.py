@@ -76,7 +76,7 @@ def vocabulary_richness(tokens: list[list[str]]) -> np.ndarray:
     result = []
 
     for tokens_ in tokens:
-        result.append(np.unique(tokens_) / len(tokens_))
+        result.append(len(np.unique(tokens_)) / len(tokens_))
 
     return np.array(result).reshape(-1, 1)
 
