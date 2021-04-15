@@ -21,7 +21,7 @@ POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH)
 FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
 
 
-def avg_length(items: list[list[str]]) -> np.array:
+def avg_length(items: list[list[str]]) -> np.ndarray:
     """
     Function to get average length of tokens and sentences.
 
@@ -38,7 +38,7 @@ def avg_length(items: list[list[str]]) -> np.array:
     return np.array(result).reshape(-1, 1)
 
 
-def pos_distribution(tokens: list[list[str]]) -> np.array:
+def pos_distribution(tokens: list[list[str]]) -> np.ndarray:
     """Feature №8. Part of speech distribution."""
     morph = pymorphy2.MorphAnalyzer()
 
