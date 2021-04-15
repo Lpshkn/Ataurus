@@ -56,6 +56,9 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         if self.avg_sentences:
             result = np.hstack((result, funcs.avg_length(self.sentences))) if result is not None \
                 else funcs.avg_length(self.sentences)
+        if self.pos_distribution:
+            result = np.hstack((result, funcs.pos_distribution(self.tokens))) if result is not None \
+                else funcs.pos_distribution(self.tokens)
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
