@@ -46,32 +46,39 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
     def transform(self, X):
         # If at least one attribute doesn't exist, this specifies the fit method wasn't called
         # and all the retrieves must be executed
-        if not hasattr(self, 'texts') or not hasattr(self, 'tokens') or not hasattr(self, 'sentences'):
-            self._retrieve_lists(X)
+        texts, tokens, sentences = self._retrieve_lists(X)
 
         result = None
         if self.avg_words:
-            result = np.hstack((result, funcs.avg_length(self.tokens))) if result is not None \
-                else funcs.avg_length(self.tokens)
+            result = np.hstack((result, funcs.avg_length(tokens))) if result is not None \
+                else funcs.avg_length(tokens)
         if self.avg_sentences:
-            result = np.hstack((result, funcs.avg_length(self.sentences))) if result is not None \
-                else funcs.avg_length(self.sentences)
+            result = np.hstack((result, funcs.avg_length(sentences))) if result is not None \
+                else funcs.avg_length(sentences)
         if self.pos_distribution:
-            result = np.hstack((result, funcs.pos_distribution(self.tokens))) if result is not None \
-                else funcs.pos_distribution(self.tokens)
+            result = np.hstack((result, funcs.pos_distribution(tokens))) if result is not None \
+                else funcs.pos_distribution(tokens)
         if self.vocabulary_richness:
-            result = np.hstack((result, funcs.vocabulary_richness(self.tokens))) if result is not None \
-                else funcs.vocabulary_richness(self.tokens)
+            result = np.hstack((result, funcs.vocabulary_richness(tokens))) if result is not None \
+                else funcs.vocabulary_richness(tokens)
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
-            result = funcs.avg_length(self.tokens)
+            result = funcs.avg_length(tokens)
 
         return result
 
-    def _retrieve_lists(self, X):
+    @staticmethod
+    def _retrieve_lists(X):
         """
-        Makes all retrieves described in the fit method.
+        Retrieve lists of texts, tokens and sentences from np.ndarray X. The list of texts must be the first column,
+        the list of tokens - the second column and sentences - the third column.
+
+        If all the values in tokens or sentences are None, Extractor gets tokens or sentences from the list of texts
+        using the Preprocessor class.
+
+        Note, if both the list of tokens and sentences are None, the list of texts will be retrieved from
+        the Preprocessor too, because of the Extractor guesses the passed texts are unprocessed.
         """
         texts = X[:, 0]
         tokens = X[:, 1]
@@ -87,6 +94,4 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         elif not any(sentences):
             sentences = preprocessor.sentences()
 
-        self.texts = texts
-        self.tokens = tokens
-        self.sentences = sentences
+        return texts, tokens, sentences
