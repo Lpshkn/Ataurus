@@ -64,11 +64,12 @@ def pos_distribution(tokens: list[list[str]]) -> np.ndarray:
 
 def foreign_words_ratio(tokens: list):
     """Feature №15. Foreign words / all words ratio."""
-    if not tokens:
-        return None
+    result = []
 
-    foreign = [token for token in tokens if FOREIGN_WORD.search(token)]
-    return len(foreign) / len(tokens)
+    for tokens_ in tokens:
+        result.append(len(list(filter(FOREIGN_WORD.search, tokens_)))/len(tokens_))
+
+    return np.array(result).reshape(-1, 1)
 
 
 def vocabulary_richness(tokens: list[list[str]]) -> np.ndarray:
