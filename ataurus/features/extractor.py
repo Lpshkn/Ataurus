@@ -50,6 +50,9 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         if self.vocabulary_richness:
             result = np.hstack((result, funcs.vocabulary_richness(tokens))) if result is not None \
                 else funcs.vocabulary_richness(tokens)
+        if self.foreign_words_ratio:
+            result = np.hstack((result, funcs.foreign_words_ratio(tokens))) if result is not None \
+                else funcs.foreign_words_ratio(tokens)
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
