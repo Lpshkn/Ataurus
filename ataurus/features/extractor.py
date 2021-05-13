@@ -62,6 +62,11 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
             fw_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.foreign_words_ratio)(tokens_) for tokens_ in tokens)
             result = np.hstack((result, np.vstack(fw_result))) if result is not None \
                 else np.vstack(fw_result)
+        if self.punctuation_distribution:
+            puncs_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.punctuations_distribution)(text) for text in texts)
+            result = np.hstack((result, np.vstack(puncs_result))) if result is not None \
+                else np.vstack(puncs_result)
+
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
