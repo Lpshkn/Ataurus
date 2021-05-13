@@ -21,7 +21,7 @@ POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH)
 FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
 
 
-def avg_length(items: list[list[str]]) -> np.ndarray:
+def avg_length(items: list[str]) -> np.ndarray:
     """
     Function to get average length of tokens and sentences.
 
@@ -29,57 +29,58 @@ def avg_length(items: list[list[str]]) -> np.ndarray:
     :return: a list of average lengths of tokens/sentences
     """
     result = []
-    for items_ in items:
-        if not items_:
-            result.append(np.nan)
-        else:
-            result.append(sum(map(len, items_)) / len(items_))
-
-    return np.array(result).reshape(-1, 1)
-
-
-def pos_distribution(tokens: list[list[str]]) -> np.ndarray:
-    """Feature №8. Part of speech distribution."""
-    morph = pymorphy2.MorphAnalyzer()
-
-    # The final matrix of distributions
-    result = []
-
-    # tokens_ - a list of tokens of one text in a list of texts
-    for tokens_ in tokens:
-        # result_ - a list of POS of one text in a list of texts
-        result_ = []
-        # Get a list of POS of a passed text
-        pos_tokens = list(pos for pos in map(lambda x: morph.parse(x)[0].tag.POS, tokens_) if pos is not None)
-        counter = Counter(pos_tokens)
-        all_count = sum(counter.values())
-
-        # Make a list of distributions using predefined pymorphy2 POS labels. If a POS label isn't in Counter, put 0
-        for pos in POS:
-            result_.append(counter.get(pos, 0) / all_count)
-        result.append(result_)
+    if not items:
+        result.append(np.nan)
+    else:
+        result.append(sum(map(len, items)) / len(items))
 
     return np.array(result)
 
 
-def foreign_words_ratio(tokens: list):
+def pos_distribution(tokens: list[str]) -> np.ndarray:
+    """Feature №8. Part of speech distribution."""
+    morph = pymorphy2.MorphAnalyzer()
+
+    # Vector of distributions
+    result = []
+
+    # Get a list of POS of a passed text
+    pos_tokens = list(pos for pos in map(lambda x: morph.parse(x)[0].tag.POS, tokens) if pos is not None)
+    counter = Counter(pos_tokens)
+    all_count = sum(counter.values())
+
+    # Make a list of distributions using predefined pymorphy2 POS labels. If a POS label isn't in Counter, put 0
+    for pos in POS:
+        if all_count:
+            result.append(counter.get(pos, 0) / all_count)
+        else:
+            result.append(np.nan)
+
+    return np.array(result)
+
+
+def foreign_words_ratio(tokens: list[str]) -> np.ndarray:
     """Feature №15. Foreign words / all words ratio."""
     result = []
 
-    for tokens_ in tokens:
-        result.append(len(list(filter(FOREIGN_WORD.search, tokens_)))/len(tokens_))
+    if not tokens:
+        result.append(np.nan)
+    else:
+        result.append(len(list(filter(FOREIGN_WORD.search, tokens)))/len(tokens))
 
-    return np.array(result).reshape(-1, 1)
+    return np.array(result)
 
 
-def vocabulary_richness(tokens: list[list[str]]) -> np.ndarray:
+def vocabulary_richness(tokens: list[str]) -> np.ndarray:
     """Feature №17. Vocabulary richness."""
     result = []
 
-    for tokens_ in tokens:
-        result.append(len(np.unique(tokens_)) / len(tokens_))
+    if not tokens:
+        result.append(np.nan)
+    else:
+        result.append(len(np.unique(tokens)) / len(tokens))
 
-    return np.array(result).reshape(-1, 1)
+    return np.array(result)
 
 
 def punctuations_distribution(text: str):
