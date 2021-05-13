@@ -48,3 +48,19 @@ class Model(BaseEstimator, ClassifierMixin):
 
     def score(self, X, y, sample_weight=None):
         return f1_score(y, self.predict(X), sample_weight=sample_weight, average='weighted')
+
+    @staticmethod
+    def _resolve_nan(X, y=None):
+        """
+        Method removes NaN values from X, y ndarrays.
+
+        :return: cleared from NaN values ndarrays
+        """
+        # Find rows having at least 1 np.nan value in its columns
+        indexes = ~np.isnan(X).any(axis=1)
+        X = X[indexes]
+        if y is not None:
+            y = y[indexes]
+            return X, y
+        else:
+            return X
