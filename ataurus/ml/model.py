@@ -35,10 +35,12 @@ class Model(BaseEstimator, ClassifierMixin):
         return self.estimator.fit(X, y)
 
     def predict(self, X):
+        X = self._resolve_nan(X)
         predicted = self.estimator.predict(X)
         return np.apply_along_axis(lambda k: self.classes_[k], 0, predicted)
 
     def score(self, X, y, sample_weight=None):
+        X, y = self._resolve_nan(X, y)
         return f1_score(y, self.predict(X), sample_weight=sample_weight, average='weighted')
 
     @staticmethod
