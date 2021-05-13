@@ -16,6 +16,12 @@ def main():
     authors, texts = database.get_authors_texts('articles_5ath', 'author_nickname', 'text')
     preprocessor = Preprocessor(texts)
 
+    texts = np.array(preprocessor.texts(), dtype=object)
+    tokens = np.array(preprocessor.tokens(), dtype=object)
+    sentences = np.array(preprocessor.sentences(), dtype=object)
+    X = np.c_[texts, tokens, sentences]
+    y = np.array(authors).ravel()
+
     pipeline = Pipeline([
         ('extracting', FeaturesExtractor()),
         ('scaler', StandardScaler()),
