@@ -8,7 +8,7 @@ from collections import Counter
 from ataurus.preparing.rules import PUNCTUATIONS
 from razdel.segmenters.punct import BRACKETS, QUOTES, SMILES
 
-DEFINITIVE_PUNCTS = re.compile(r"(...)|(\?!)|(\?\.{2,3})|(!\.{2,3})|(!!!)|([….?!])")
+DEFINITIVE_PUNCTS = re.compile(r"(\.{3})|(\?!)|(\?\.{2,3})|(!\.{2,3})|(!!!)|([….?!])")
 DIVIDING_PUNCTS = re.compile(r"[,;:‑–—−-]")
 HIGHLIGHT_PUNCTS = re.compile(rf'[{BRACKETS}{QUOTES}]')
 SMILES_PUNCTS = re.compile(SMILES)
@@ -16,6 +16,7 @@ DIGITS_PUNCTS = re.compile(r"[+$/*%^]")
 
 # Predefined parts of speech
 POS = list(pymorphy2.MorphAnalyzer().TagClass.PARTS_OF_SPEECH)
+PUNCTS_NAMES = ["definitive_puncts", "dividing_puncts", "highlight_puncts", "smiles_puncts", "digits_puncts"]
 
 # Compiled regex for foreign words
 FOREIGN_WORD = re.compile(r"\b[^\s\d\Wа-яА-ЯёЁ_]+\b", re.IGNORECASE)
@@ -84,16 +85,22 @@ def vocabulary_richness(tokens: list[str]) -> np.ndarray:
 
 
 def punctuations_distribution(text: str):
-    columns = ["definitive_puncts", "dividing_puncts", "highlight_puncts", "smiles_puncts"]
-    if not text:
-        return dict.fromkeys(columns, 0)
+    # Vector of distributions
+    result = []
 
     all_count = len(PUNCTUATIONS.findall(text))
-    distribution = {
-        "definitive_puncts": len(DEFINITIVE_PUNCTS.findall(text)) / all_count if all_count else 0,
-        "dividing_puncts": len(DIVIDING_PUNCTS.findall(text)) / all_count if all_count else 0,
-        "highlight_puncts": len(HIGHLIGHT_PUNCTS.findall(text)) / all_count if all_count else 0,
-        "smiles_puncts": len(SMILES_PUNCTS.findall(text)) / all_count if all_count else 0,
-        "digits_puncts": len(DIGITS_PUNCTS.findall(text)) / all_count if all_count else 0
+    rules = {
+        "definitive_puncts": DEFINITIVE_PUNCTS,
+        "dividing_puncts": DIVIDING_PUNCTS,
+        "highlight_puncts": HIGHLIGHT_PUNCTS,
+        "smiles_puncts": SMILES_PUNCTS,
+        "digits_puncts": DIGITS_PUNCTS
     }
-    return distribution
+
+    for punct_name in PUNCTS_NAMES:
+        if all_count:
+            result.append(len(rules[punct_name].findall(text)) / all_count)
+        else:
+            result.append(np.nan)
+
+    return np.array(result)
