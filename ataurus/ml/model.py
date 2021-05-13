@@ -3,17 +3,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import f1_score
-from sklearn.impute import SimpleImputer
 
 
 class Model(BaseEstimator, ClassifierMixin):
-    def __init__(self, estimator='RandomForest', remove_nan=True):
+    def __init__(self, estimator='RandomForest'):
         """
         :param estimator: estimator can be 'RandomForest', 'SVM'.
-        :param remove_nan: remove np.nan values from X
         """
         self.estimator = estimator
-        self.remove_nan = remove_nan
 
     def fit(self, X, y):
         """
@@ -32,13 +29,8 @@ class Model(BaseEstimator, ClassifierMixin):
         # Return digit-view of y
         self.classes_, y = np.unique(y, return_inverse=True)
 
-        if self.remove_nan:
-            # Find rows having at least 1 np.nan value in its columns
-            indexes = ~np.isnan(X).any(axis=1)
-            X = X[indexes]
-            y = y[indexes]
-        else:
-            X = SimpleImputer().fit_transform(X)
+        # Remove NaN values
+        X, y = self._resolve_nan(X, y)
 
         return self.estimator.fit(X, y)
 
