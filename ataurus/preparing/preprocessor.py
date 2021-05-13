@@ -7,13 +7,15 @@ import re
 from razdel import tokenize, sentenize
 from .rules import PUNCTUATIONS, URLS, STOPWORDS
 from pymorphy2 import MorphAnalyzer
+from joblib.parallel import Parallel, delayed
 
 
 class Preprocessor:
-    def __init__(self, texts: list[str]):
+    def __init__(self, texts: list[str], n_jobs=-1):
         if not any(texts):
             raise ValueError("A list of texts is incorrect: it's may be None or empty")
         self._texts = texts
+        self.n_jobs = n_jobs
 
     def tokens(self,
                lower=True,
@@ -27,10 +29,9 @@ class Preprocessor:
         :param remove_stopwords: remove stopwords from the tokens
         :return: a list of lists of tokens for an each passed text
         """
-        results = []
         morph = MorphAnalyzer()
 
-        for text in self._texts:
+        def process_text(text):
             preprocessed_text = self.preprocess_text(text, lower=lower, delete_whitespace=True, delete_urls=True)
 
             # Nested conditions - it's faster than make it separately
@@ -48,8 +49,9 @@ class Preprocessor:
                               if not PUNCTUATIONS.match(token.text) and not STOPWORDS.match(token.text)]
                 else:
                     tokens = [token.text for token in tokenize(preprocessed_text) if not PUNCTUATIONS.match(token.text)]
+            return tokens
 
-            results.append(tokens)
+        results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
         return results
 
@@ -63,9 +65,7 @@ class Preprocessor:
         :param lower: to lower a result
         :return: a list of lists of sentences for an each passed text
         """
-        results = []
-
-        for text in self._texts:
+        def process_text(text):
             preprocessed_text = self.preprocess_text(text, lower=False, delete_whitespace=False, delete_urls=True)
 
             if lower:
@@ -75,7 +75,9 @@ class Preprocessor:
                 sentences = [re.sub(r'[\s]+', r' ', PUNCTUATIONS.sub(" ", sentence.text)).strip()
                              for sentence in sentenize(preprocessed_text) if sentence.text]
 
-            results.append(sentences)
+            return sentences
+
+        results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
         return results
 
