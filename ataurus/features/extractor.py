@@ -6,11 +6,13 @@ import ataurus.features.functions as funcs
 import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.preparing.preprocessor import Preprocessor
+from joblib.parallel import Parallel, delayed
 
 
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
     def __init__(self, avg_words=True, avg_sentences=True, pos_distribution=True,
-                 foreign_words_ratio=True, vocabulary_richness=True, punctuation_distribution=True):
+                 foreign_words_ratio=True, vocabulary_richness=True, punctuation_distribution=True,
+                 n_jobs=-1, verbose=0):
         """
         Extractor of features matrix. All parameters are flags that specify to include a result of processing
         of each method to the final result.
@@ -28,6 +30,8 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         self.foreign_words_ratio = foreign_words_ratio
         self.vocabulary_richness = vocabulary_richness
         self.punctuation_distribution = punctuation_distribution
+        self.n_jobs = n_jobs
+        self.verbose = verbose
 
     def fit(self, X, y=None):
         return self
@@ -39,20 +43,25 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
 
         result = None
         if self.avg_words:
-            result = np.hstack((result, funcs.avg_length(tokens))) if result is not None \
-                else funcs.avg_length(tokens)
+            aw_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.avg_length)(tokens_) for tokens_ in tokens)
+            result = np.hstack((result, np.vstack(aw_result))) if result is not None \
+                else np.vstack(aw_result)
         if self.avg_sentences:
-            result = np.hstack((result, funcs.avg_length(sentences))) if result is not None \
-                else funcs.avg_length(sentences)
+            as_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.avg_length)(sentences_) for sentences_ in sentences)
+            result = np.hstack((result, np.vstack(as_result))) if result is not None \
+                else np.vstack(as_result)
         if self.pos_distribution:
-            result = np.hstack((result, funcs.pos_distribution(tokens))) if result is not None \
-                else funcs.pos_distribution(tokens)
+            pos_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.pos_distribution)(tokens_) for tokens_ in tokens)
+            result = np.hstack((result, np.vstack(pos_result))) if result is not None \
+                else np.vstack(pos_result)
         if self.vocabulary_richness:
-            result = np.hstack((result, funcs.vocabulary_richness(tokens))) if result is not None \
-                else funcs.vocabulary_richness(tokens)
+            voc_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.vocabulary_richness)(tokens_) for tokens_ in tokens)
+            result = np.hstack((result, np.vstack(voc_result))) if result is not None \
+                else np.vstack(voc_result)
         if self.foreign_words_ratio:
-            result = np.hstack((result, funcs.foreign_words_ratio(tokens))) if result is not None \
-                else funcs.foreign_words_ratio(tokens)
+            fw_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.foreign_words_ratio)(tokens_) for tokens_ in tokens)
+            result = np.hstack((result, np.vstack(fw_result))) if result is not None \
+                else np.vstack(fw_result)
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
