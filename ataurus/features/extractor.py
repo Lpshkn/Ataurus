@@ -11,8 +11,8 @@ from joblib.parallel import Parallel, delayed
 
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
     def __init__(self, avg_words=True, avg_sentences=True, pos_distribution=True,
-                 foreign_words_ratio=True, vocabulary_richness=True, punctuation_distribution=True,
-                 n_jobs=-1, verbose=0):
+                 foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
+                 n_jobs=-1, verbose=True):
         """
         Extractor of features matrix. All parameters are flags that specify to include a result of processing
         of each method to the final result.
@@ -21,14 +21,14 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         :param avg_sentences: an average length of all sentences
         :param pos_distribution: a part of speech distribution
         :param foreign_words_ratio: ratio of foreign words count / count of all words
-        :param vocabulary_richness: a lexicon size
+        :param lexicon: a lexicon size
         :param punctuation_distribution: a distribution of punctuation symbols
         """
         self.avg_words = avg_words
         self.avg_sentences = avg_sentences
         self.pos_distribution = pos_distribution
         self.foreign_words_ratio = foreign_words_ratio
-        self.vocabulary_richness = vocabulary_richness
+        self.lexicon = lexicon
         self.punctuation_distribution = punctuation_distribution
         self.n_jobs = n_jobs
         self.verbose = verbose
@@ -58,10 +58,10 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
             pos_result = process(funcs.pos_distribution, tokens)
             result = np.hstack((result, pos_result)) if result is not None \
                 else pos_result
-        if self.vocabulary_richness:
-            voc_result = process(funcs.vocabulary_richness, tokens)
-            result = np.hstack((result, voc_result)) if result is not None \
-                else voc_result
+        if self.lexicon:
+            lexicon_result = process(funcs.lexicon, tokens)
+            result = np.hstack((result, lexicon_result)) if result is not None \
+                else lexicon_result
         if self.foreign_words_ratio:
             fw_result = process(funcs.foreign_words_ratio, tokens)
             result = np.hstack((result, fw_result)) if result is not None \

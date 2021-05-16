@@ -72,7 +72,7 @@ def foreign_words_ratio(tokens: list[str]) -> np.ndarray:
     return np.array(result)
 
 
-def vocabulary_richness(tokens: list[str]) -> np.ndarray:
+def lexicon(tokens: list[str]) -> np.ndarray:
     """Feature №17. Vocabulary richness."""
     result = []
 
