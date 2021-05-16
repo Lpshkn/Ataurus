@@ -1,15 +1,11 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import f1_score
 
 
 class Model(BaseEstimator, ClassifierMixin):
     def __init__(self, estimator=RandomForestClassifier()):
-        """
-        :param estimator: estimator can be 'RandomForest', 'SVC'.
-        """
         self.estimator = estimator
 
     def fit(self, X, y):
