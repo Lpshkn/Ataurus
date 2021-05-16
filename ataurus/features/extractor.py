@@ -41,31 +41,35 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         # and all the retrieves must be executed
         texts, tokens, sentences = self._retrieve_lists(X)
 
+        def process(function, objects):
+            result_ = Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects)
+            return np.vstack(result_)
+
         result = None
         if self.avg_words:
-            aw_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.avg_length)(tokens_) for tokens_ in tokens)
-            result = np.hstack((result, np.vstack(aw_result))) if result is not None \
-                else np.vstack(aw_result)
+            aw_result = process(funcs.avg_length, tokens)
+            result = np.hstack((result, aw_result)) if result is not None \
+                else aw_result
         if self.avg_sentences:
-            as_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.avg_length)(sentences_) for sentences_ in sentences)
-            result = np.hstack((result, np.vstack(as_result))) if result is not None \
-                else np.vstack(as_result)
+            as_result = process(funcs.avg_length, sentences)
+            result = np.hstack((result, as_result)) if result is not None \
+                else as_result
         if self.pos_distribution:
-            pos_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.pos_distribution)(tokens_) for tokens_ in tokens)
-            result = np.hstack((result, np.vstack(pos_result))) if result is not None \
-                else np.vstack(pos_result)
+            pos_result = process(funcs.pos_distribution, tokens)
+            result = np.hstack((result, pos_result)) if result is not None \
+                else pos_result
         if self.vocabulary_richness:
-            voc_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.vocabulary_richness)(tokens_) for tokens_ in tokens)
-            result = np.hstack((result, np.vstack(voc_result))) if result is not None \
-                else np.vstack(voc_result)
+            voc_result = process(funcs.vocabulary_richness, tokens)
+            result = np.hstack((result, voc_result)) if result is not None \
+                else voc_result
         if self.foreign_words_ratio:
-            fw_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.foreign_words_ratio)(tokens_) for tokens_ in tokens)
-            result = np.hstack((result, np.vstack(fw_result))) if result is not None \
-                else np.vstack(fw_result)
+            fw_result = process(funcs.foreign_words_ratio, tokens)
+            result = np.hstack((result, fw_result)) if result is not None \
+                else fw_result
         if self.punctuation_distribution:
-            puncs_result = Parallel(n_jobs=self.n_jobs)(delayed(funcs.punctuations_distribution)(text) for text in texts)
-            result = np.hstack((result, np.vstack(puncs_result))) if result is not None \
-                else np.vstack(puncs_result)
+            puncs_result = process(funcs.punctuations_distribution, texts)
+            result = np.hstack((result, puncs_result)) if result is not None \
+                else puncs_result
 
         if result is None:
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
