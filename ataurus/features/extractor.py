@@ -6,6 +6,7 @@ import ataurus.features.functions as funcs
 import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.preparing.preprocessor import Preprocessor
+from ataurus.features.features import FEATURES
 from joblib.parallel import Parallel, delayed
 
 
@@ -41,6 +42,13 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         # and all the retrieves must be executed
         texts, tokens, sentences = self._retrieve_lists(X)
 
+        if self.verbose:
+            features = [param for param, flag in self.get_params().items()
+                        if flag and param not in ['n_jobs', 'verbose']]
+            print("Extracting features is beginning with follow features:")
+            for feature in features:
+                print(f'\t- {FEATURES[feature]}')
+
         def process(function, objects):
             result_ = Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects)
             return np.vstack(result_)
@@ -75,6 +83,9 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
             warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
                           "average length of words will be set True automatically.")
             result = funcs.avg_length(tokens)
+
+        if self.verbose:
+            print("Extracting features completed", end='\n\n')
 
         return result
 
