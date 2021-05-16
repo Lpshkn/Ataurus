@@ -13,7 +13,7 @@ from joblib.parallel import Parallel, delayed
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
     def __init__(self, avg_words=True, avg_sentences=True, pos_distribution=True,
                  foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
-                 n_jobs=-1, verbose=True):
+                 n_jobs=1, verbose=True):
         """
         Extractor of features matrix. All parameters are flags that specify to include a result of processing
         of each method to the final result.
