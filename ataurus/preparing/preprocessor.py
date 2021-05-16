@@ -8,6 +8,7 @@ from razdel import tokenize, sentenize
 from .rules import PUNCTUATIONS, URLS, STOPWORDS
 from pymorphy2 import MorphAnalyzer
 from joblib.parallel import Parallel, delayed
+from tqdm import tqdm
 
 
 class Preprocessor:
@@ -20,13 +21,15 @@ class Preprocessor:
     def tokens(self,
                lower=True,
                normalization=True,
-               remove_stopwords=True) -> list[list[str]]:
+               remove_stopwords=True,
+               verbose=True) -> list[list[str]]:
         """
         Get a list of tokens from a passed text.
 
         :param lower: to lower a result
         :param normalization: normalize each token in the sentence, each word is transformed to lower case
         :param remove_stopwords: remove stopwords from the tokens
+        :param verbose:
         :return: a list of lists of tokens for an each passed text
         """
         morph = MorphAnalyzer()
@@ -51,18 +54,27 @@ class Preprocessor:
                     tokens = [token.text for token in tokenize(preprocessed_text) if not PUNCTUATIONS.match(token.text)]
             return tokens
 
-        results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
+        if verbose:
+            print('Start tokens processing...')
+            results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in tqdm(self._texts))
+            print('Tokens processing completed')
+        else:
+            results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
         return results
 
     def sentences(self,
                   lower=True,
                   normalization=True,
-                  remove_stopwords=True) -> list[list[str]]:
+                  remove_stopwords=True,
+                  verbose=True) -> list[list[str]]:
         """
         Get a list of sentences from a passed text.
 
         :param lower: to lower a result
+        :param normalization:
+        :param remove_stopwords:
+        :param verbose:
         :return: a list of lists of sentences for an each passed text
         """
         def process_text(text):
@@ -77,7 +89,12 @@ class Preprocessor:
 
             return sentences
 
-        results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
+        if verbose:
+            print('Start sentences processing...')
+            results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in tqdm(self._texts))
+            print('Sentences processing completed')
+        else:
+            results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
         return results
 
