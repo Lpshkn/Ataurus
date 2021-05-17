@@ -21,7 +21,7 @@ class Preprocessor:
     def tokens(self,
                lower=True,
                normalization=True,
-               remove_stopwords=True,
+               remove_stopwords=False,
                verbose=True) -> list[list[str]]:
         """
         Get a list of tokens from a passed text.
