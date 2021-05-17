@@ -17,9 +17,8 @@ from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cach
 class ConsoleHandler:
     NAME = 'ataurus'
     DESCRIPTION = 'Ataurus = Attribution of Authorship Russian. ' \
-                  'This program collects data from the sites(optional), processes this data, ' \
-                  'gets the parameter vector from the data and trains the model of machine learning to specify ' \
-                  'the author of an unknown text.'
+                  'This program receives texts with their authors, fit a model on that data and serializes ' \
+                  'the fitted model in an output file. Ataurus allows to predict authors of unknown texts.'
     EPILOG = 'LPSHKN, 2020'
 
     def __init__(self, args):
