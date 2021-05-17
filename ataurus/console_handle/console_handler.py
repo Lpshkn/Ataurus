@@ -38,10 +38,10 @@ class ConsoleHandler:
         :return: an instance of the ArgumentParser class
         """
         parser = argparse.ArgumentParser(prog=program_name, description=description, epilog=epilog)
-        subparsers = parser.add_subparsers(title='Commands', dest='command')
+        modes = parser.add_subparsers(title='Modes', dest='mode')
 
         # Info mode
-        info = subparsers.add_parser('info',
+        info = modes.add_parser('info',
                                      help='info mode to get more information about a model or additional settings')
         info.add_argument('-m', '--model',
                           help='the name of a file containing a model',
@@ -49,7 +49,7 @@ class ConsoleHandler:
                           type=str)
 
         # Train mode
-        train = subparsers.add_parser('train',
+        train = modes.add_parser('train',
                                       help='train a model')
         train.add_argument('input',
                            help="the name of a .csv file containing train data",
@@ -60,7 +60,7 @@ class ConsoleHandler:
                            type=str)
 
         # Predict mode
-        predict = subparsers.add_parser('predict',
+        predict = modes.add_parser('predict',
                                         help='make predictions')
         predict.add_argument('input',
                              help="the name of a .csv file containing data that you need to predict authors for",
@@ -130,8 +130,8 @@ class ConsoleHandler:
                     os.remove(os.path.join(CACHE_DIRECTORY, filename))
 
     @property
-    def command(self) -> str:
-        return self._parameters.command
+    def mode(self) -> str:
+        return self._parameters.mode
 
     @property
     def input(self):
