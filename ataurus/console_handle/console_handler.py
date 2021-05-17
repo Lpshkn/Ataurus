@@ -14,7 +14,7 @@ from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cach
                     convert_from_cache_name, get_hash)
 
 
-class Configurator:
+class ConsoleHandler:
     NAME = 'ataurus'
     DESCRIPTION = 'Ataurus = Attribution of Authorship Russian. ' \
                   'This program collects data from the sites(optional), processes this data, ' \
@@ -23,7 +23,7 @@ class Configurator:
     EPILOG = 'LPSHKN, 2020'
 
     def __init__(self, args):
-        self._parser = self._get_parser(Configurator.NAME, Configurator.DESCRIPTION, Configurator.EPILOG)
+        self._parser = self._get_parser(ConsoleHandler.NAME, ConsoleHandler.DESCRIPTION, ConsoleHandler.EPILOG)
 
         self._cache = None
         # Get parameters from the arguments received from the command line
