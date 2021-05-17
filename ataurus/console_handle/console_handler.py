@@ -40,33 +40,29 @@ class ConsoleHandler:
         parser = argparse.ArgumentParser(prog=program_name, description=description, epilog=epilog)
         modes = parser.add_subparsers(title='Modes', dest='mode')
 
-        # Info mode
-        info = modes.add_parser('info',
-                                     help='info mode to get more information about a model or additional settings')
-        info.add_argument('-m', '--model',
-                          help='the name of a file containing a model',
-                          default=MODEL_FILE,
-                          type=str)
-
         # Train mode
         train = modes.add_parser('train',
-                                      help='train a model')
+                                 help='mode for training a model using special parameters')
         train.add_argument('input',
-                           help="the name of a .csv file containing train data",
-                           type=argparse.FileType(mode='r', encoding='utf-8'))
+                           help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
+                                "config file .cfg, containing the hostname and the port, or it should be string "
+                                "such as 'hostname:port/index_name'",
+                           type=str)
         train.add_argument('-o', '--output',
-                           help="the name of a file where a model will be saved",
+                           help="the name of a file where a model will be serialized",
                            default=MODEL_FILE,
                            type=str)
 
         # Predict mode
         predict = modes.add_parser('predict',
-                                        help='make predictions')
-        predict.add_argument('input',
-                             help="the name of a .csv file containing data that you need to predict authors for",
-                             type=argparse.FileType(mode='r', encoding='utf-8'))
+                                   help='make predictions')
+        train.add_argument('input',
+                           help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
+                                "config file .cfg, containing the hostname and the port, or it should be string "
+                                "such as 'hostname:port/index_name'",
+                           type=str)
         predict.add_argument('-m', '--model',
-                             help='the name of a file containing a model',
+                             help='the name of a file containing a serialized model',
                              default=MODEL_FILE,
                              type=str)
         return parser
