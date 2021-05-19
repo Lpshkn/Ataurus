@@ -2,6 +2,8 @@
 Module represents a class that will process data to extract a matrix of features from it.
 """
 import numpy as np
+import pandas as pd
+
 import ataurus.features.functions as funcs
 import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -35,6 +37,12 @@ class FeaturesCombiner(BaseEstimator, TransformerMixin):
         self.verbose = verbose
 
     def fit(self, X, y=None):
+        # Check either input matrix is extracted features or just input texts and they should be processed
+        if type(X) == pd.DataFrame:
+            self.X_extracted_ = True
+        else:
+            self.X_extracted_ = False
+
         return self
 
     def transform(self, X):
