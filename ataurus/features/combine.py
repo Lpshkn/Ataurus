@@ -6,11 +6,11 @@ import ataurus.features.functions as funcs
 import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.preparing.preprocessor import Preprocessor
-from ataurus.features.features import FEATURES
+from ataurus.features.features import FEATURES_DESCRIPTION
 from joblib.parallel import Parallel, delayed
 
 
-class FeaturesExtractor(BaseEstimator, TransformerMixin):
+class FeaturesCombiner(BaseEstimator, TransformerMixin):
     def __init__(self, avg_words=True, avg_sentences=True, pos_distribution=True,
                  foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
                  n_jobs=1, verbose=True):
@@ -47,7 +47,7 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
                         if flag and param not in ['n_jobs', 'verbose']]
             print("Extracting features is beginning with follow features:")
             for feature in features:
-                print(f'\t- {FEATURES[feature]}')
+                print(f'\t- {FEATURES_DESCRIPTION[feature]}')
 
         def process(function, objects):
             result_ = Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects)
