@@ -10,6 +10,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.preparing.preprocessor import Preprocessor
 from ataurus.features.features import FEATURES_DESCRIPTION
 from joblib.parallel import Parallel, delayed
+from ataurus.features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
+                                       LEXICON_SIZE, FOREIGN_RATIO)
 
 
 class FeaturesCombiner(BaseEstimator, TransformerMixin):
@@ -42,6 +44,21 @@ class FeaturesCombiner(BaseEstimator, TransformerMixin):
             self.X_extracted_ = True
         else:
             self.X_extracted_ = False
+
+        # Create a list of names of extracting features
+        self.features_names_ = []
+        if self.avg_words:
+            self.features_names_.append(AVG_WORDS)
+        if self.avg_sentences:
+            self.features_names_.append(AVG_SENTENCES)
+        if self.pos_distribution:
+            self.features_names_.append(POS_DISTRIBUTION)
+        if self.foreign_words_ratio:
+            self.features_names_.append(FOREIGN_RATIO)
+        if self.lexicon:
+            self.features_names_.append(LEXICON_SIZE)
+        if self.punctuation_distribution:
+            self.features_names_.append(PUNCTUATIONS_DISTRIBUTION)
 
         return self
 
