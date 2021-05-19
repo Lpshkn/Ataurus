@@ -4,6 +4,8 @@ sentences and processed or unprocessed texts.
 All unnecessary symbols, stop words and other incorrect symbols will be removed from the text.
 """
 import re
+import time
+
 from razdel import tokenize, sentenize
 from .rules import PUNCTUATIONS, URLS, STOPWORDS
 from pymorphy2 import MorphAnalyzer
@@ -56,6 +58,7 @@ class Preprocessor:
 
         if verbose:
             print('Start tokens processing...')
+            time.sleep(1)
             results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in tqdm(self._texts))
             print('Tokens processing completed')
         else:
@@ -91,6 +94,7 @@ class Preprocessor:
 
         if verbose:
             print('Start sentences processing...')
+            time.sleep(1)
             results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in tqdm(self._texts))
             print('Sentences processing completed')
         else:
