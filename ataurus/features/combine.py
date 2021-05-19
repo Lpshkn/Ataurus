@@ -1,23 +1,19 @@
-"""
-Module represents a class that will process data to extract a matrix of features from it.
-"""
 import numpy as np
 import pandas as pd
 
 import ataurus.features.functions as funcs
 import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
-from ataurus.preparing.preprocessor import Preprocessor
-from ataurus.features.features import FEATURES_DESCRIPTION
+from ataurus.features.extract import FeaturesExtractor
 from joblib.parallel import Parallel, delayed
 from ataurus.features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
-                                       LEXICON_SIZE, FOREIGN_RATIO)
+                                       LEXICON_SIZE, FOREIGN_RATIO, FEATURES_DESCRIPTION)
 
 
 class FeaturesCombiner(BaseEstimator, TransformerMixin):
     def __init__(self, avg_words=True, avg_sentences=True, pos_distribution=True,
                  foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
-                 n_jobs=1, verbose=True):
+                 n_jobs=1, verbose=False):
         """
         Extractor of features matrix. All parameters are flags that specify to include a result of processing
         of each method to the final result.
@@ -63,16 +59,10 @@ class FeaturesCombiner(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
-        # If at least one attribute doesn't exist, this specifies the fit method wasn't called
-        # and all the retrieves must be executed
-        texts, tokens, sentences = self._retrieve_lists(X)
-
         if self.verbose:
-            features = [param for param, flag in self.get_params().items()
-                        if flag and param not in ['n_jobs', 'verbose']]
             print("Extracting features is beginning with follow features:")
-            for feature in features:
-                print(f'\t- {FEATURES_DESCRIPTION[feature]}')
+            for feature_name in self.features_names_:
+                print(f'\t- {FEATURES_DESCRIPTION[feature_name]}')
 
         def process(function, objects):
             result_ = Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects)
