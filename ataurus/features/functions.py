@@ -5,7 +5,7 @@ import pymorphy2
 import re
 import numpy as np
 from collections import Counter
-from ataurus.preparing.rules import PUNCTUATIONS
+from preparing.rules import PUNCTUATIONS
 from razdel.segmenters.punct import BRACKETS, QUOTES, SMILES
 
 DEFINITIVE_PUNCTS = re.compile(r"(\.{3})|(\?!)|(\?\.{2,3})|(!\.{2,3})|(!!!)|([….?!])")

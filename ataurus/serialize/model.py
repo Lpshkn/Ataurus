@@ -1,5 +1,5 @@
 import pickle
-from ataurus.ml.model import Model
+from ml.model import Model
 
 
 def serialize_model(model: Model, filename: str):

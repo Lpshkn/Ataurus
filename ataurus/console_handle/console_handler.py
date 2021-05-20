@@ -9,7 +9,9 @@ import argparse
 import pickle
 import pandas as pd
 import json
-from ataurus.features.extractor import FeaturesExtractor
+import joblib
+from database.client import Database
+from features.extract import FeaturesExtractor
 from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cache_name,
                     convert_from_cache_name, get_hash)
 

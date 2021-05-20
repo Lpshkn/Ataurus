@@ -1,10 +1,14 @@
 import sys
-import ataurus.configurator.configurator as cfg
+
+import pandas as pd
+
+import console_handle.console_handler as cfg
 import numpy as np
-from ataurus.preparing.preprocessor import Preprocessor
-from ataurus.features.extractor import FeaturesExtractor
-from ataurus.database.client import Database
-from ataurus.ml.model import Model
+from preparing.preprocessor import Preprocessor
+from features.extract import FeaturesExtractor
+from features.combine import FeaturesCombiner
+from database.client import Database
+from ml.model import Model
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV

@@ -3,11 +3,11 @@ Module represents a class that will process data to extract a matrix of features
 """
 import numpy as np
 import pandas as pd
-import ataurus.features.functions as funcs
+import features.functions as funcs
 from sklearn.base import BaseEstimator, TransformerMixin
-from ataurus.preparing.preprocessor import Preprocessor
+from preparing.preprocessor import Preprocessor
 from joblib.parallel import Parallel, delayed
-from ataurus.features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
+from features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
                                        LEXICON_SIZE, FOREIGN_RATIO)
 
 
