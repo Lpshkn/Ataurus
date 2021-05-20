@@ -48,7 +48,8 @@ class ConsoleHandler:
         train.add_argument('input',
                            help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
                                 "config file .cfg, containing the hostname and the port, or it should be string "
-                                "such as 'hostname:port/index_name'",
+                                "such as 'hostname:port/index_name', or it may be serialized DataFrame object, "
+                                "containing extracted features",
                            type=str)
         train.add_argument('-o', '--output',
                            help="the name of a file where a model will be serialized",
@@ -58,11 +59,12 @@ class ConsoleHandler:
         # Predict mode
         predict = modes.add_parser('predict',
                                    help='make predictions')
-        train.add_argument('input',
-                           help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
-                                "config file .cfg, containing the hostname and the port, or it should be string "
-                                "such as 'hostname:port/index_name'",
-                           type=str)
+        predict.add_argument('input',
+                             help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
+                                  "config file .cfg, containing the hostname and the port, or it should be string "
+                                  "such as 'hostname:port/index_name', or it may be serialized DataFrame object, "
+                                  "containing extracted features",
+                             type=str)
         predict.add_argument('-m', '--model',
                              help='the name of a file containing a serialized model',
                              default=MODEL_FILE,
