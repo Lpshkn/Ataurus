@@ -163,13 +163,10 @@ class ConsoleHandler:
             return pickle.load(file)
 
     @property
-    def output_file(self):
+    def output(self):
         if not ('output' in self._parameters):
             raise ValueError('You try to get output filename to save a model, but this option is None')
         output = self._parameters.output
-        parent_path = os.path.dirname(output)
-        if not os.path.exists(parent_path):
-            os.makedirs(parent_path)
 
         return output
 
