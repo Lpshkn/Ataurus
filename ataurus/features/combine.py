@@ -61,40 +61,23 @@ class FeaturesCombiner(BaseEstimator, TransformerMixin):
             for feature_name in self.features_names_:
                 print(f'\t- {FEATURES_DESCRIPTION[feature_name]}')
 
-        def process(function, objects):
-            result_ = Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects)
-            return np.vstack(result_)
+        result = []
 
-        result = None
-        if self.avg_words:
-            aw_result = process(funcs.avg_length, tokens)
-            result = np.hstack((result, aw_result)) if result is not None \
-                else aw_result
-        if self.avg_sentences:
-            as_result = process(funcs.avg_length, sentences)
-            result = np.hstack((result, as_result)) if result is not None \
-                else as_result
-        if self.pos_distribution:
-            pos_result = process(funcs.pos_distribution, tokens)
-            result = np.hstack((result, pos_result)) if result is not None \
-                else pos_result
-        if self.lexicon:
-            lexicon_result = process(funcs.lexicon, tokens)
-            result = np.hstack((result, lexicon_result)) if result is not None \
-                else lexicon_result
-        if self.foreign_words_ratio:
-            fw_result = process(funcs.foreign_words_ratio, tokens)
-            result = np.hstack((result, fw_result)) if result is not None \
-                else fw_result
-        if self.punctuation_distribution:
-            puncs_result = process(funcs.punctuations_distribution, texts)
-            result = np.hstack((result, puncs_result)) if result is not None \
-                else puncs_result
+        # If a features matrix wasn't prepared, extract tokens, sentences from texts and extract features
+        if not self.X_extracted_:
+            texts, tokens, sentences = FeaturesExtractor._retrieve_lists(X)
 
-        if result is None:
-            warnings.warn("You shouldn't make all the parameters None, because this case can't be processed. The "
-                          "average length of words will be set True automatically.")
-            result = funcs.avg_length(tokens)
+            features_dict = dict()
+            for feature_name in FEATURES_DESCRIPTION.keys():
+                features_dict[feature_name] = True if feature_name in self.features_names_ else False
+
+            X = FeaturesExtractor._extract(texts, tokens, sentences, n_jobs=self.n_jobs, **features_dict)
+
+        for feature_name in self.features_names_:
+            # Get columns corresponding the name of selecting feature
+            values = X.loc[:, X.columns.str.startswith(feature_name)].values
+            result.append(values)
+        result = np.hstack(result)
 
         if self.verbose:
             print("Extracting features completed", end='\n\n')
