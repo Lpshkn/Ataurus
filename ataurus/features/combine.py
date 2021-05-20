@@ -1,11 +1,8 @@
 import numpy as np
 import pandas as pd
 
-import ataurus.features.functions as funcs
-import warnings
 from sklearn.base import BaseEstimator, TransformerMixin
 from ataurus.features.extract import FeaturesExtractor
-from joblib.parallel import Parallel, delayed
 from ataurus.features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
                                        LEXICON_SIZE, FOREIGN_RATIO, FEATURES_DESCRIPTION)
 
@@ -103,31 +100,3 @@ class FeaturesCombiner(BaseEstimator, TransformerMixin):
             print("Extracting features completed", end='\n\n')
 
         return result
-
-    @staticmethod
-    def _retrieve_lists(X):
-        """
-        Retrieve lists of texts, tokens and sentences from np.ndarray X. The list of texts must be the first column,
-        the list of tokens - the second column and sentences - the third column.
-
-        If all the values in tokens or sentences are None, Extractor gets tokens or sentences from the list of texts
-        using the Preprocessor class.
-
-        Note, if both the list of tokens and sentences are None, the list of texts will be retrieved from
-        the Preprocessor too, because of the Extractor guesses the passed texts are unprocessed.
-        """
-        texts = X[:, 0]
-        tokens = X[:, 1]
-        sentences = X[:, 2]
-
-        preprocessor = Preprocessor(texts)
-        if not any(tokens) and not any(sentences):
-            texts = preprocessor.texts()
-            tokens = preprocessor.tokens()
-            sentences = preprocessor.sentences()
-        elif not any(tokens):
-            tokens = preprocessor.tokens()
-        elif not any(sentences):
-            sentences = preprocessor.sentences()
-
-        return texts, tokens, sentences
