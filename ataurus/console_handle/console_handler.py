@@ -130,29 +130,40 @@ class ConsoleHandler:
 
     @property
     def input(self):
-        file = self._parameters.input
+        # The input may be either an input file or a connection string
+        if os.path.exists(self._parameters.input):
+            # If the input file has csv format
+            if re.search(r'\.csv$', self._parameters.input):
+                df = pd.read_csv(self._parameters.input)
 
-        # The input file must be csv format because of it will provide safe operations with data
-        if not re.search(r'\.csv$', file.name):
-            file.close()
-            raise ValueError("The input file isn't csv format")
+                try:
+                    texts = df['text'].values
+                    authors = df['author'].values
+                except Exception:
+                    raise ValueError('Your .csv input file has no correct format: '
+                                     'it must have "text" and "author" columns')
+                return texts, authors
+            # If the input file is an ElasticSearch config file
+            elif re.search(r'\.cfg$', self._parameters.input):
+                pass
 
-        try:
-            df = pd.read_csv(file)
-        except UnicodeDecodeError:
-            file.close()
-            raise ValueError("Data in the input file isn't UTF-8 encoding")
+            # If the input is DataFrame serialized object containing extracted features
+            else:
+                df = joblib.load(self._parameters.input)
+                if not type(df) == pd.DataFrame:
+                    raise TypeError("The passed input file doesn't contain serialized DataFrame object. "
+                                    "Also it isn't a .csv file, a config file or a connection string")
+                return df
 
-        # Attempt of getting cached data from the special directory
-        basename = os.path.basename(file.name)
-        if basename in self._cache:
-            if self._cache[basename] == get_hash(file.name):
-                with open(os.path.join(CACHE_DIRECTORY, convert_to_cache_name(basename)), 'rb') as file:
-                    extractor = pickle.load(file)
-                    if isinstance(extractor, FeaturesExtractor):
-                        return extractor
+        # If the input is connection string of ElasticSearch such as <hostname:port/index>
+        elif re.search(r'^[\w.-]+:[\d]{2,5}/[^\s]+$', self._parameters.input):
+            hostname_port, index_name = self._parameters.input.strip().split('/')
+            database = Database.connect([hostname_port])
+            authors, texts = database.get_authors_texts(index_name, 'author_nickname', 'text')
 
-        return df
+            return texts, authors
+        else:
+            raise ValueError("The input is neither input file nor a connection string of ElasticSearch")
 
     @property
     def model(self):
