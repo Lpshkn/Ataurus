@@ -31,34 +31,54 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         if self.verbose:
             print("Extracting features is beginning...")
 
-        def process(function, objects: list, feature_name: str):
-            result_ = np.vstack(Parallel(n_jobs=self.n_jobs)(delayed(function)(objects_) for objects_ in objects))
-
-            # Build a list of the column names to create a features DataFrame
-            n_columns = result_.shape[1]
-            columns_name = [feature_name + f'_{i}' for i in range(1, n_columns+1)]
-
-            return pd.DataFrame(result_, columns=columns_name)
-
-        # Average length of words
-        aw_result = process(funcs.avg_length, tokens, AVG_WORDS)
-        # Average length of sentences
-        as_result = process(funcs.avg_length, sentences, AVG_SENTENCES)
-        # POS distribution
-        pos_result = process(funcs.pos_distribution, tokens, POS_DISTRIBUTION)
-        # Lexicon size
-        lexicon_result = process(funcs.lexicon, tokens, LEXICON_SIZE)
-        # Foreign words ratio
-        fw_result = process(funcs.foreign_words_ratio, tokens, FOREIGN_RATIO)
-        # Punctuations distribution
-        punctuations_result = process(funcs.punctuations_distribution, texts, PUNCTUATIONS_DISTRIBUTION)
-
-        result = pd.concat((aw_result, as_result, pos_result, lexicon_result, fw_result, punctuations_result), axis=1)
+        result = self._extract(texts, tokens, sentences, n_jobs=self.n_jobs)
 
         if self.verbose:
             print("Extracting features completed", end='\n\n')
 
         return result
+
+    @staticmethod
+    def _extract(texts: list[str], tokens: list[list[str]], sentences: list[list[str]], /,
+                 avg_words=True, avg_sentences=True, pos_distribution=True,
+                 foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
+                 n_jobs=1) -> pd.DataFrame:
+        """
+
+        """
+        def process(function, objects: list, feature_name: str):
+            result_ = np.vstack(Parallel(n_jobs)(delayed(function)(objects_) for objects_ in objects))
+
+            # Build a list of the column names to create a features DataFrame
+            n_columns = result_.shape[1]
+            columns_name = [feature_name + f'_{i}' for i in range(1, n_columns + 1)]
+
+            return pd.DataFrame(result_, columns=columns_name)
+
+        results = []
+        # Average length of words
+        if avg_words:
+            results.append(process(funcs.avg_length, tokens, AVG_WORDS))
+        # Average length of sentences
+        if avg_sentences:
+            results.append(process(funcs.avg_length, sentences, AVG_SENTENCES))
+        # POS distribution
+        if pos_distribution:
+            results.append(process(funcs.pos_distribution, tokens, POS_DISTRIBUTION))
+        # Lexicon size
+        if lexicon:
+            results.append(process(funcs.lexicon, tokens, LEXICON_SIZE))
+        # Foreign words ratio
+        if foreign_words_ratio:
+            results.append(process(funcs.foreign_words_ratio, tokens, FOREIGN_RATIO))
+        # Punctuations distribution
+        if punctuation_distribution:
+            results.append(process(funcs.punctuations_distribution, texts, PUNCTUATIONS_DISTRIBUTION))
+
+        if not results:
+            raise ValueError("At least one feature must be chosen")
+
+        return pd.concat(results, axis=1)
 
     @staticmethod
     def _retrieve_lists(X):
