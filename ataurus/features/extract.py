@@ -44,7 +44,7 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
                  foreign_words_ratio=True, lexicon=True, punctuation_distribution=True,
                  n_jobs=1) -> pd.DataFrame:
         """
-
+        Returns DataFrame object contains extracted features with column names such as <feature_name>_<n>.
         """
         def process(function, objects: list, feature_name: str):
             result_ = np.vstack(Parallel(n_jobs)(delayed(function)(objects_) for objects_ in objects))
