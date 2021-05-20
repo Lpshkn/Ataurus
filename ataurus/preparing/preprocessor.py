@@ -5,6 +5,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 """
 import re
 import time
+import numpy as np
 
 from razdel import tokenize, sentenize
 from .rules import PUNCTUATIONS, URLS, STOPWORDS
@@ -24,7 +25,7 @@ class Preprocessor:
                lower=True,
                normalization=True,
                remove_stopwords=False,
-               verbose=True) -> list[list[str]]:
+               verbose=True) -> np.ndarray:
         """
         Get a list of tokens from a passed text.
 
@@ -64,13 +65,13 @@ class Preprocessor:
         else:
             results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
-        return results
+        return np.array(results, dtype=object)
 
     def sentences(self,
                   lower=True,
                   normalization=True,
                   remove_stopwords=True,
-                  verbose=True) -> list[list[str]]:
+                  verbose=True) -> np.ndarray:
         """
         Get a list of sentences from a passed text.
 
@@ -100,10 +101,10 @@ class Preprocessor:
         else:
             results = Parallel(n_jobs=self.n_jobs)(delayed(process_text)(text) for text in self._texts)
 
-        return results
+        return np.array(results, dtype=object)
 
-    def texts(self):
-        return self._texts
+    def texts(self) -> np.ndarray:
+        return np.array(self._texts, dtype=object)
 
     @staticmethod
     def preprocess_text(text: str,
