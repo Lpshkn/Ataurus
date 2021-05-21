@@ -106,10 +106,9 @@ class ConsoleHandler:
                     raise ValueError('Your .csv input file has no correct format: '
                                      'it must have "text" and "author" columns')
                 return texts, authors
-            # If the input is DataFrame serialized object containing extracted features
+            # If the input is DataFrame serialized object containing extracted features and a list of authors (optional)
             else:
-                df = deserialize_features(self._parameters.input)
-                return df
+                return deserialize_features(self._parameters.input)
 
         # If the input is connection string of ElasticSearch such as <hostname:port/index>
         elif re.search(r'^[\w.-]+:[\d]{2,5}/[^\s]+$', self._parameters.input):
