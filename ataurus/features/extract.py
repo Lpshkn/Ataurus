@@ -8,7 +8,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from preparing.preprocessor import Preprocessor
 from joblib.parallel import Parallel, delayed
 from features.features import (AVG_WORDS, AVG_SENTENCES, POS_DISTRIBUTION, PUNCTUATIONS_DISTRIBUTION,
-                                       LEXICON_SIZE, FOREIGN_RATIO)
+                               LEXICON_SIZE, FOREIGN_RATIO)
 
 
 class FeaturesExtractor(BaseEstimator, TransformerMixin):
@@ -46,6 +46,7 @@ class FeaturesExtractor(BaseEstimator, TransformerMixin):
         """
         Returns DataFrame object contains extracted features with column names such as <feature_name>_<n>.
         """
+
         def process(function, objects: list, feature_name: str):
             result_ = np.vstack(Parallel(n_jobs)(delayed(function)(objects_) for objects_ in objects))
 
