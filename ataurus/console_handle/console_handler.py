@@ -6,15 +6,10 @@ will be printed in the command line.
 import os
 import re
 import argparse
-import pickle
 import pandas as pd
-import json
 from database.client import Database
-from features.extract import FeaturesExtractor
 from serialize.features import deserialize_features
 from serialize.model import deserialize_model
-from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cache_name,
-                    convert_from_cache_name, get_hash)
 
 
 class ConsoleHandler:
