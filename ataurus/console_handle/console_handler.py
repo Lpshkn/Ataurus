@@ -53,7 +53,6 @@ class ConsoleHandler:
                            type=str)
         train.add_argument('-o', '--output',
                            help="the name of a file where a model will be serialized",
-                           default=MODEL_FILE,
                            type=str)
         train.add_argument('-f', '--features',
                            help="where extracted features will be serialized",
@@ -67,9 +66,8 @@ class ConsoleHandler:
                                   "or it should be string such as 'hostname:port/index_name', "
                                   "or it may be serialized DataFrame object, containing extracted features",
                              type=str)
-        predict.add_argument('-m', '--model',
+        predict.add_argument('model',
                              help='the name of a file containing a serialized model',
-                             default=MODEL_FILE,
                              type=str)
         predict.add_argument('-f', '--features',
                              help="where extracted features will be serialized",
