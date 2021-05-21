@@ -9,9 +9,10 @@ import argparse
 import pickle
 import pandas as pd
 import json
-import joblib
 from database.client import Database
 from features.extract import FeaturesExtractor
+from serialize.features import deserialize_features
+from serialize.model import deserialize_model
 from .utils import (MODEL_FILE, CACHE_DIRECTORY, CACHE_CFG_FILE, convert_to_cache_name,
                     convert_from_cache_name, get_hash)
 
@@ -133,6 +134,12 @@ class ConsoleHandler:
         return self._parameters.mode
 
     @property
+    def features_path(self):
+        if self._parameters.features:
+            return self._parameters.features
+        return None
+
+    @property
     def input(self):
         # The input may be either an input file or a connection string
         if os.path.exists(self._parameters.input):
@@ -153,10 +160,7 @@ class ConsoleHandler:
 
             # If the input is DataFrame serialized object containing extracted features
             else:
-                df = joblib.load(self._parameters.input)
-                if not type(df) == pd.DataFrame:
-                    raise TypeError("The passed input file doesn't contain serialized DataFrame object. "
-                                    "Also it isn't a .csv file, a config file or a connection string")
+                df = deserialize_features(self._parameters.input)
                 return df
 
         # If the input is connection string of ElasticSearch such as <hostname:port/index>
