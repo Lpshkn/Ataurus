@@ -22,7 +22,6 @@ class ConsoleHandler:
     def __init__(self, args):
         self._parser = self._get_parser(ConsoleHandler.NAME, ConsoleHandler.DESCRIPTION, ConsoleHandler.EPILOG)
 
-        self._cache = None
         # Get parameters from the arguments received from the command line
         self._parameters = self._get_parameters(args)
 
