@@ -5,6 +5,7 @@ All unnecessary symbols, stop words and other incorrect symbols will be removed 
 """
 import re
 import time
+import pandas as pd
 import numpy as np
 
 from razdel import tokenize, sentenize
@@ -15,10 +16,18 @@ from tqdm import tqdm
 
 
 class Preprocessor:
-    def __init__(self, texts: list[str], n_jobs=-1):
+    def __init__(self, texts: list[str], authors: list[str] = None, n_jobs=-1):
         if not any(texts):
             raise ValueError("A list of texts is incorrect: it's may be None or empty")
-        self._texts = texts
+
+        if authors is not None:
+            df = pd.DataFrame(np.c_[texts, authors], columns=['texts', 'authors'])
+        else:
+            df = pd.DataFrame(texts, columns=['texts'])
+
+        df = df[df['texts'].notnull()]
+        self._texts = df['texts'].values
+        self._authors = df['authors'].values if authors is not None else None
         self.n_jobs = n_jobs
 
     def tokens(self,
@@ -105,6 +114,10 @@ class Preprocessor:
 
     def texts(self) -> np.ndarray:
         return np.array(self._texts, dtype=object)
+
+    @property
+    def authors(self):
+        return self._authors
 
     @staticmethod
     def preprocess_text(text: str,
