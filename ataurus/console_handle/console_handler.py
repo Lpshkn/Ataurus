@@ -181,11 +181,9 @@ class ConsoleHandler:
 
     @property
     def output(self):
-        if not ('output' in self._parameters):
-            raise ValueError('You try to get output filename to save a model, but this option is None')
-        output = self._parameters.output
-
-        return output
+        if self._parameters.output:
+            return self._parameters.output
+        return None
 
     def to_cache(self, extractor: FeaturesExtractor):
         """
