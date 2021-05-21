@@ -1,4 +1,5 @@
 import pickle
+import os
 from ml.model import Model
 
 
@@ -22,5 +23,13 @@ def deserialize_model(filename: str) -> Model:
 
     :param filename: the name of the file
     """
+    if not os.path.exists(filename):
+        raise FileNotFoundError("Specified file for deserializing doesn't exist")
+
     with open(filename, 'rb') as file:
-        return pickle.load(file)
+        model = pickle.load(file)
+
+    if type(model) != Model:
+        raise TypeError("Deserialized object isn't Model")
+
+    return model
