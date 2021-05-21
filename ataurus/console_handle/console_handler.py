@@ -47,13 +47,15 @@ class ConsoleHandler:
                                  help='mode for training a model using special parameters')
         train.add_argument('input',
                            help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
-                                "config file .cfg, containing the hostname and the port, or it should be string "
-                                "such as 'hostname:port/index_name', or it may be serialized DataFrame object, "
-                                "containing extracted features",
+                                "or it should be string such as 'hostname:port/index_name', "
+                                "or it may be serialized DataFrame object, containing extracted features",
                            type=str)
         train.add_argument('-o', '--output',
                            help="the name of a file where a model will be serialized",
                            default=MODEL_FILE,
+                           type=str)
+        train.add_argument('-f', '--features',
+                           help="where extracted features will be serialized",
                            type=str)
 
         # Predict mode
@@ -61,13 +63,15 @@ class ConsoleHandler:
                                    help='make predictions')
         predict.add_argument('input',
                              help="it should be .csv file, containing 'author, text' columns or an ElasticSearch "
-                                  "config file .cfg, containing the hostname and the port, or it should be string "
-                                  "such as 'hostname:port/index_name', or it may be serialized DataFrame object, "
-                                  "containing extracted features",
+                                  "or it should be string such as 'hostname:port/index_name', "
+                                  "or it may be serialized DataFrame object, containing extracted features",
                              type=str)
         predict.add_argument('-m', '--model',
                              help='the name of a file containing a serialized model',
                              default=MODEL_FILE,
+                             type=str)
+        predict.add_argument('-f', '--features',
+                             help="where extracted features will be serialized",
                              type=str)
         return parser
 
