@@ -87,46 +87,6 @@ class ConsoleHandler:
 
         return parameters
 
-    @staticmethod
-    def _initialize_directories():
-        """
-        Create the directories for config files.
-        """
-        if not os.path.exists(CACHE_DIRECTORY):
-            os.makedirs(CACHE_DIRECTORY)
-
-    def _initialize_cache(self):
-        """
-        Method initialize the config cache file containing information about filenames and its cache.
-        If there are some troubles with matching the names of files and files in .cache directory,
-        this method will remove these values and files.
-        """
-        if not os.path.exists(CACHE_CFG_FILE):
-            self._cache = {}
-            for filename in os.listdir(CACHE_DIRECTORY):
-                os.remove(os.path.join(CACHE_DIRECTORY, filename))
-        else:
-            with open(CACHE_CFG_FILE, 'r') as file:
-                self._cache = json.load(file)
-
-            filenames = set(self._cache.keys())
-            cache_filenames = set(os.listdir(CACHE_DIRECTORY))
-
-            # Delete lost keys from the dict
-            for filename in filenames:
-                cache_filename = convert_to_cache_name(filename)
-
-                # If file wasn't found in the .cache directory, remove it from the dict
-                if cache_filename not in cache_filenames:
-                    del self._cache[filename]
-
-            # Delete lost files in the .cache directory
-            for cache_filename in cache_filenames:
-                filename = convert_from_cache_name(cache_filename)
-
-                if filename not in filenames:
-                    os.remove(os.path.join(CACHE_DIRECTORY, filename))
-
     @property
     def mode(self) -> str:
         return self._parameters.mode
@@ -172,31 +132,10 @@ class ConsoleHandler:
         if not ('model' in self._parameters):
             raise ValueError('You try to get a model, but this option is None')
 
-        with open(self._parameters.model, 'rb') as file:
-            return pickle.load(file)
+        return deserialize_model(self._parameters.model)
 
     @property
     def output(self):
         if self._parameters.output:
             return self._parameters.output
         return None
-
-    def to_cache(self, extractor: FeaturesExtractor):
-        """
-        Dumps an instance of the FeaturesExtractor to the cache directory.
-
-        :param extractor: an instance of FeaturesExtractor
-        """
-        if not isinstance(extractor, FeaturesExtractor):
-            raise TypeError("You're trying to cache not FeatureExtractor's instance")
-
-        filename = self._parameters.input.name
-        basename = os.path.basename(filename)
-        self._cache[basename] = get_hash(filename)
-
-        cache_filename = convert_to_cache_name(filename)
-        with open(os.path.join(CACHE_DIRECTORY, cache_filename), 'wb') as file:
-            pickle.dump(extractor, file)
-
-        with open(CACHE_CFG_FILE, 'w') as file:
-            json.dump(self._cache, file, indent=4)
