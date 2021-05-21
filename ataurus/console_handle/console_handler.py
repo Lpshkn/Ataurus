@@ -45,7 +45,7 @@ class ConsoleHandler:
                                 "or it should be string such as 'hostname:port/index_name', "
                                 "or it may be serialized DataFrame object, containing extracted features",
                            type=str)
-        train.add_argument('-o', '--output',
+        train.add_argument('output',
                            help="the name of a file where a model will be serialized",
                            type=str)
         train.add_argument('-f', '--features',
