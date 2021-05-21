@@ -9,7 +9,7 @@ def serialize_model(model: Model, filename: str):
     :param model: serializing model
     :param filename: the name of the file
     """
-    if type(model) == Model:
+    if type(model) != Model:
         raise ValueError("Serializing model isn't a Model instance")
 
     with open(filename, 'wb') as file:
