@@ -9,10 +9,9 @@ from ml.model import Model
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
 from serialize.model import serialize_model
 from serialize.features import serialize_features
+from ml.grid_search import PARAM_GRID_DEFAULT
 
 
 def main():
@@ -58,15 +57,8 @@ def main():
             ('model', Model())
         ])
 
-        # Run a grid search for searching the best hyper parameters for a selected model
-        param_grid = [
-            {
-                'model__estimator': [RandomForestClassifier()],
-                'model__estimator__n_estimators': [100, 200],
-                'model__estimator__criterion': ['gini', 'entropy'],
-                'model__estimator__max_depth': [2, 6, 10],
-            }
-        ]
+        # Run a grid search for searching the best hyper parameters for a model
+        param_grid = console_handler.train_config if console_handler.train_config else PARAM_GRID_DEFAULT
         grid_search = GridSearchCV(pipeline, param_grid, n_jobs=-1, cv=5, verbose=1, scoring='f1_weighted')
         grid_search.fit(X, y)
 
