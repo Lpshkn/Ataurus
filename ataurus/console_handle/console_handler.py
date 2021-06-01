@@ -5,11 +5,14 @@ will be printed in the command line.
 """
 import os
 import re
+import json
 import argparse
 import pandas as pd
 from database.client import Database
 from serialize.features import deserialize_features
 from serialize.model import deserialize_model
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 
 
 class ConsoleHandler:
@@ -50,6 +53,10 @@ class ConsoleHandler:
                            type=str)
         train.add_argument('-f', '--features',
                            help="where extracted features will be serialized",
+                           type=str)
+        train.add_argument('-c', '--train_config',
+                           help="path to a config file containing parameters for a grid search "
+                                "of parameters while training",
                            type=str)
 
         # Predict mode
@@ -132,3 +139,36 @@ class ConsoleHandler:
         if self._parameters.output:
             return self._parameters.output
         return None
+
+    @property
+    def train_config(self):
+        """
+        Gets and returns a grid params for the GridSearchCV class to search optimal hyper parameters of a model.
+        """
+        if not self._parameters.train_config:
+            return None
+
+        if not os.path.exists(self._parameters.train_config):
+            raise FileNotFoundError("The training config file wasn't found")
+
+        with open(self._parameters.train_config, 'r') as file:
+            json_parameters = json.load(file)
+
+        # Iterate through the whole list of blocks and change 'model__estimator' parameter to an object of Sklearn.
+        parameters = []
+        for parameters_block in json_parameters['parameters']:
+            if 'model__estimator' in parameters_block:
+                estimator = parameters_block['model__estimator'][0]
+                if estimator == 'RandomForestClassifier':
+                    estimator = [RandomForestClassifier()]
+                elif estimator == 'SVM':
+                    estimator = [SVC()]
+                else:
+                    raise ValueError("Invalid model was specified in the training config file: you may specify SVM or "
+                                     "RandomForestClassifier")
+
+                parameters_block['model__estimator'] = estimator
+
+            parameters.append(parameters_block)
+
+        return parameters
