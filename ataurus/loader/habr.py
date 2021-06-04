@@ -1,3 +1,4 @@
+import numpy as np
 import requests
 import bs4
 import logging
@@ -77,3 +78,52 @@ class HabrParser:
 
         return all_links
 
+    async def _parse(self, links: list[str]) -> np.ndarray:
+        """
+        Parses web sites and returns a list of values representing 'post_number', 'author' and 'text' columns.
+
+        :param links: a list of links that must be parsed
+        :return: numpy.ndarray containing post_number', 'author' and 'text' values for the each link
+        """
+        # A counter of incorrect requests
+        incorrect_count = 0
+        # A list of finish values
+        values = []
+
+        for link in links:
+            post_number = link.split('/')[-2]
+
+            response = requests.get(link)
+
+            if response.status_code == 200:
+                # Reset the counter
+                # If the counter becomes equal to self._limit_incorrect, parsing ends
+                incorrect_count = 0
+
+                # The count of correct parsed posts
+                self._count += 1
+
+                bs = bs4.BeautifulSoup(response.text, features='html.parser')
+                author = bs.find(class_=self.USERNAME_CLASS).text
+                title = bs.find(class_=self.TITLE_CLASS).text
+                text = bs.find(class_=self.TEXT_CLASS).text
+
+                logging.warning(f"(#{self._count}) id={post_number} {author}: {title}")
+
+                values.append((post_number, author, text))
+
+            elif response.status_code == 404:
+                logging.warning(f"(#{self._count}) id={post_number} Error 404")
+
+                # Increase the counter of incorrect requests
+                incorrect_count += 1
+
+                if incorrect_count == self._limit_incorrect:
+                    break
+            else:
+                logging.warning(f"(#{self._count}) id={post_number} Error {response.status_code}")
+
+            # Take the timeout to avoid a ban
+            await asyncio.sleep(self._timeout + random.randint(0, 5) * random.random())
+
+        return np.vstack(values)
