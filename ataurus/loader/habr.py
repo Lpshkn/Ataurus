@@ -4,6 +4,7 @@ import bs4
 import logging
 import asyncio
 import random
+import pandas as pd
 from database.client import Database
 from loader.utils import get_sublists
 from datetime import datetime
@@ -39,7 +40,37 @@ class HabrParser:
 
         # Count of incorrect consecutive requests
         # This case allows to determine the max id among all the posts from the site
-        self._limit_incorrect = 15
+        self._limit_incorrect = 20
+
+    async def parse_by_authors(self, authors: list[str], max_count=None) -> pd.DataFrame:
+        """
+        Gets articles from Habr.com by the authors' names.
+
+        :param authors: the names of authors
+        :param max_count: the maximum count of articles per an author
+        :return: a DataFrame object containing the 'post_number', 'author' and 'text' columns
+        """
+        # Run a timer
+        logging.warning("Parsing beginning...")
+        begin_time = datetime.now()
+
+        tasks = []
+        for sublist_authors in get_sublists(authors, self._concurrent):
+            tasks.append(self._get_links_by_authors(sublist_authors, max_count))
+        links = np.hstack(await asyncio.gather(*tasks)).tolist()
+
+        tasks = []
+        for sublist_links in get_sublists(links, self._concurrent):
+            tasks.append(self._parse(sublist_links))
+        values = np.vstack(await asyncio.gather(*tasks))
+
+        dataframe = pd.DataFrame(np.vstack(values), columns=['post_number', 'author', 'text'])
+
+        # Stop the timer
+        logging.warning('Parsing was completed')
+        logging.warning(f'Work time: {datetime.now() - begin_time}')
+
+        return dataframe
 
     async def _get_links_by_authors(self, authors: list[str], max_count: int) -> list[str]:
         """
