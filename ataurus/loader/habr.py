@@ -11,8 +11,9 @@ logging.basicConfig(format="[%(asctime)s] %(msg)s",
                     level=logging.WARNING)
 
 
-class Parser:
-    URL = "https://habr.com/ru/post/{post_number}"
+class HabrParser:
+    URL_POST = "https://habr.com/ru/post/{post_number}"
+    URL_USER = "https://habr.com/ru/users/{username}/posts/page{page_number}"
     USERNAME_CLASS = "user-info__nickname user-info__nickname_small"
     DATETIME_CLASS = "post__time"
     DATETIME_KEY = "date-time_published"
