@@ -6,7 +6,7 @@ import asyncio
 import random
 import pandas as pd
 from database.client import Database
-from loader.utils import get_sublists
+from data_parse.utils import get_sublists
 from datetime import datetime
 
 logging.basicConfig(format="[%(asctime)s] %(msg)s",
