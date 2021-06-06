@@ -25,6 +25,9 @@ class Database:
 
     @property
     def connection(self):
+        if self._es is None:
+            raise ValueError("You didn't initialize a connection with an ElasticSearch cluster")
+
         return self._es
 
     def get_authors_texts(self, index: str, author_field: str, text_field: str) -> tuple[list[str], list[str]]:
