@@ -79,7 +79,13 @@ class ConsoleHandler:
                                  help='parse web sites to get data')
         parse.add_argument('-m', '--max_count',
                            help='maximum articles by one author',
-                           default=10**10)
+                           default=10 ** 10)
+        parse.add_argument('--host',
+                           help='the host address of the Elasticsearch cluster',
+                           type=str)
+        parse.add_argument('--port',
+                           help='the port of the Elasticsearch cluster',
+                           type=str)
 
         parse_resources = parse.add_subparsers(title='Resources', dest='resource')
 
@@ -228,3 +234,23 @@ class ConsoleHandler:
             raise ValueError('The name of index is None.')
 
         return self._parameters.index
+
+    @property
+    def host(self) -> str:
+        if (host := self._parameters.host) is None:
+            host = os.getenv('ES_HOST', 'localhost')
+            if host is None:
+                self._parser.error("hostname of Elasticsearch server wasn't specify, please, enter it or set ES_HOST "
+                                   "environment value")
+
+        return host
+
+    @property
+    def port(self) -> str:
+        if (port := self._parameters.port) is None:
+            port = os.getenv("ES_PORT", '9200')
+            if port is None:
+                self._parser.error("port of Elasticsearch server wasn't specify, please, enter it or set ES_PORT "
+                                   "environment value")
+
+        return port
