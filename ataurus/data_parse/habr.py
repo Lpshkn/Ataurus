@@ -42,11 +42,12 @@ class HabrParser:
         # This case allows to determine the max id among all the posts from the site
         self._limit_incorrect = 20
 
-    async def parse_by_authors(self, authors: list[str], max_count=None) -> pd.DataFrame:
+    async def parse_by_authors(self, authors: list[str], save_to: str = None, max_count: int = None) -> pd.DataFrame:
         """
         Gets articles from Habr.com by the authors' names.
 
         :param authors: the names of authors
+        :param save_to: filename in .csv format where data will be serialized
         :param max_count: the maximum count of articles per an author
         :return: a DataFrame object containing the 'post_number', 'author' and 'text' columns
         """
@@ -69,6 +70,10 @@ class HabrParser:
         # Stop the timer
         logging.warning('Parsing was completed')
         logging.warning(f'Work time: {datetime.now() - begin_time}')
+
+        # Serialize into a .csv file
+        if save_to:
+            dataframe.to_csv(save_to, index=False)
 
         return dataframe
 
