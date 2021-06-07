@@ -92,7 +92,6 @@ class ConsoleHandler:
                                    help='the name of an index of an ElasticSearch cluster where data will be loaded')
 
         habr_resource.add_argument('-o', '--output',
-                                   dest='parse_output',
                                    help=".csv file where data will be loaded to")
 
         return parser
@@ -222,3 +221,10 @@ class ConsoleHandler:
     @property
     def max_count(self):
         return self._parameters.max_count
+
+    @property
+    def index(self):
+        if self._parameters.index is None:
+            raise ValueError('The name of index is None.')
+
+        return self._parameters.index
