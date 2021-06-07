@@ -65,7 +65,7 @@ class HabrParser:
             tasks.append(self._parse(sublist_links))
         values = np.vstack(await asyncio.gather(*tasks))
 
-        dataframe = pd.DataFrame(np.vstack(values), columns=['post_number', 'author', 'text'])
+        dataframe = pd.DataFrame(np.vstack(values), columns=['post_number', 'author', 'text', 'title', 'link'])
 
         # Stop the timer
         logging.warning('Parsing was completed')
@@ -146,7 +146,7 @@ class HabrParser:
 
                 logging.warning(f"(#{self._count}) id={post_number} {author}: {title}")
 
-                values.append((post_number, author, text))
+                values.append((post_number, author, text, title, link))
 
             elif response.status_code == 404:
                 logging.warning(f"(#{self._count}) id={post_number} Error 404")
