@@ -73,6 +73,28 @@ class ConsoleHandler:
         predict.add_argument('-f', '--features',
                              help="where extracted features will be serialized",
                              type=str)
+
+        # Parse mode
+        parse = modes.add_parser('parse',
+                                 help='parse web sites to get data')
+        parse.add_argument('-m', '--max_count',
+                           help='maximum articles by one author',
+                           default=10**10)
+
+        parse_resources = parse.add_subparsers(title='Resources', dest='resource')
+
+        # Habr parsing mode
+        habr_resource = parse_resources.add_parser('habr', help='Habr.com site')
+        habr_resource.add_argument('authors',
+                                   help="a list of authors represents a file or a string where authors "
+                                        "separated by ','")
+        habr_resource.add_argument('index',
+                                   help='the name of an index of an ElasticSearch cluster where data will be loaded')
+
+        habr_resource.add_argument('-o', '--output',
+                                   dest='parse_output',
+                                   help=".csv file where data will be loaded to")
+
         return parser
 
     def _get_parameters(self, args):
@@ -84,13 +106,20 @@ class ConsoleHandler:
         parameters = self._parser.parse_args(args)
 
         if parameters.mode is None:
-            self._parser.error("You must specify 1 of 2 commands: train or predict")
+            self._parser.error("You must specify 1 of 3 commands: train, predict or parse")
+        if parameters.mode == 'parse':
+            if parameters.resource is None:
+                self._parser.error("You must specify 1 of 1 resources: habr")
 
         return parameters
 
     @property
     def mode(self) -> str:
         return self._parameters.mode
+
+    @property
+    def resource(self) -> str:
+        return self._parameters.resource
 
     @property
     def features_path(self):
@@ -172,3 +201,24 @@ class ConsoleHandler:
             parameters.append(parameters_block)
 
         return parameters
+
+    @property
+    def authors(self):
+        if self._parameters.authors is None:
+            raise ValueError('You try to get access to a list of authors that is None')
+
+        if os.path.exists(self._parameters.authors):
+            with open(self._parameters.authors, 'r') as file:
+                authors = [author.strip() for author in file.read().splitlines() if author]
+        else:
+            authors = [author.strip() for author in self._parameters.authors.split(',') if author]
+
+        if not authors:
+            raise ValueError('A list of authors is empty. May be you pass incorrect file or a string, '
+                             'containing authors')
+
+        return authors
+
+    @property
+    def max_count(self):
+        return self._parameters.max_count
