@@ -1,6 +1,7 @@
 import sys
 import elasticsearch
 import pandas as pd
+import time
 from elasticsearch_dsl import Search
 from tqdm import tqdm
 
@@ -63,6 +64,10 @@ class Database:
         :param dataframe: a DataFrame object containing data
         :param verbose: show a progress bar and other verbosity
         """
+        if verbose:
+            print('Loading data to the ElasticSearch cluster started...')
+            time.sleep(1)
+
         for _, row in tqdm(dataframe.dropna().iterrows(), total=len(dataframe.index), disable=(not verbose)):
             try:
                 body = {
