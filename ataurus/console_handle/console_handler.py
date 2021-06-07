@@ -155,7 +155,7 @@ class ConsoleHandler:
         elif re.search(r'^[\w.-]+:[\d]{2,5}/[^\s]+$', self._parameters.input):
             hostname_port, index_name = self._parameters.input.strip().split('/')
             database = Database.connect([hostname_port])
-            authors, texts = database.get_authors_texts(index_name, 'author_nickname', 'text')
+            authors, texts = database.get_authors_texts(index_name, 'author', 'text')
 
             return texts, authors
         else:
