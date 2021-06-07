@@ -1,5 +1,8 @@
+import sys
 import elasticsearch
+import pandas as pd
 from elasticsearch_dsl import Search
+from tqdm import tqdm
 
 
 class Database:
@@ -49,3 +52,29 @@ class Database:
             texts.append(hit[text_field])
 
         return authors, texts
+
+    def upload_dataframe(self, index: str, dataframe: pd.DataFrame, verbose=False):
+        """
+        Method uploads a DataFrame object into an ElasticSearch cluster. This DataFrame object must contain 'author' and
+        'text' columns. The 'post_number' column doesn't require, but if it's specified a document will have the id
+        as the number of an article.
+
+        :param index: the name of an index where data will be upload to
+        :param dataframe: a DataFrame object containing data
+        :param verbose: show a progress bar and other verbosity
+        """
+        for _, row in tqdm(dataframe.dropna().iterrows(), total=len(dataframe.index), disable=(not verbose)):
+            try:
+                body = {
+                    "author": row["author"],
+                    "text": row['text']
+                }
+            except KeyError:
+                print("Uploading dataframe object is incorrect and doesn't contain 'author' or 'text' columns ",
+                      file=sys.stderr)
+                exit(-1)
+
+            if 'post_number' in row:
+                self.connection.index(index, body=body, id=row["post_number"])
+            else:
+                self.connection.index(index, body=body)
