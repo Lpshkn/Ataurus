@@ -73,6 +73,8 @@ class ConsoleHandler:
         predict.add_argument('-f', '--features',
                              help="where extracted features will be serialized",
                              type=str)
+        predict.add_argument('-o', '--output',
+                             help='file where results of predicting will be saved')
 
         # Parse mode
         parse = modes.add_parser('parse',
@@ -143,10 +145,12 @@ class ConsoleHandler:
                 try:
                     texts = df['text'].values
                     authors = df['author'].values
+                    titles = df['title'].values
+                    links = df['link'].values
                 except Exception:
                     raise ValueError('Your .csv input file has no correct format: '
                                      'it must have "text" and "author" columns')
-                return texts, authors
+                return texts, authors, titles, links
             # If the input is DataFrame serialized object containing extracted features and a list of authors (optional)
             else:
                 return deserialize_features(self._parameters.input)
@@ -155,9 +159,9 @@ class ConsoleHandler:
         elif re.search(r'^[\w.-]+:[\d]{2,5}/[^\s]+$', self._parameters.input):
             hostname_port, index_name = self._parameters.input.strip().split('/')
             database = Database.connect([hostname_port])
-            authors, texts = database.get_authors_texts(index_name, 'author', 'text')
+            authors, texts, titles, links = database.get_authors_texts(index_name)
 
-            return texts, authors
+            return texts, authors, titles, links
         else:
             raise ValueError("The input is neither input file nor a connection string of ElasticSearch")
 
