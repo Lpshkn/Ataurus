@@ -149,7 +149,7 @@ nosetests --with-coverage --cover-package=ataurus
 
 Сначала необходимо собрать Docker-образ:
 ```shell script
-sudo docker build -t ataurus .
+sudo docker build -t ataurus:1.1.0 .
 ```  
 
 
