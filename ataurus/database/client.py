@@ -34,25 +34,25 @@ class Database:
 
         return self._es
 
-    def get_authors_texts(self, index: str, author_field: str, text_field: str) -> tuple[list[str], list[str]]:
+    def get_authors_texts(self, index: str) -> tuple:
         """
         Gets all documents from the index of ElasticSearch cluster by its author- and text- fields.
 
         :param index: the name of index containing documents
-        :param author_field: the name of field containing the name of an author of a document
-        :param text_field: the name of field containing a text of a document
         :return: tuple of list of authors, list of texts
         """
         # Update the index before processing
         self.connection.indices.refresh(index=index)
 
         search = Search(index=index, using=self.connection).query("match_all")
-        authors, texts = [], []
+        authors, texts, titles, links = [], [], [], []
         for hit in search.scan():
-            authors.append(hit[author_field])
-            texts.append(hit[text_field])
+            authors.append(hit['author'])
+            texts.append(hit['text'])
+            titles.append(hit['title'])
+            links.append(hit['link'])
 
-        return authors, texts
+        return authors, texts, titles, links
 
     def upload_dataframe(self, index: str, dataframe: pd.DataFrame, verbose=False):
         """
@@ -72,7 +72,9 @@ class Database:
             try:
                 body = {
                     "author": row["author"],
-                    "text": row['text']
+                    "text": row['text'],
+                    "title": row['title'],
+                    "link": row['link']
                 }
             except KeyError:
                 print("Uploading dataframe object is incorrect and doesn't contain 'author' or 'text' columns ",
