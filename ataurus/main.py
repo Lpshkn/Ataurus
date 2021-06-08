@@ -31,8 +31,14 @@ async def main():
         if type(input_data) == tuple:
             if type(input_data[0]) == pd.DataFrame:
                 X, y = input_data
+
+                titles = X['titles']
+                links = X['links']
             else:
-                texts, authors = input_data
+                texts, authors, titles, links = input_data
+
+                titles = np.array(titles, dtype=object)
+                links = np.array(links, dtype=object)
 
                 # Extract lists of texts, tokens and sentences
                 preprocessor = Preprocessor(texts, authors)
@@ -48,17 +54,23 @@ async def main():
                 X = extractor.fit_transform(X)
                 # Serialize extracted features if it's necessary
                 if console_handler.features_path:
+                    X['titles'] = titles
+                    X['links'] = links
                     serialize_features(X, console_handler.features_path, authors=y)
 
             # Remove null rows from texts and authors lists
             notnull_indexes = X.notnull().all(axis=1)
             X = X[notnull_indexes]
             y = y[notnull_indexes]
+            titles = titles[notnull_indexes]
+            links = links[notnull_indexes]
         else:
             X = input_data
             # Remove null rows from texts and authors lists
             notnull_indexes = X.notnull().all(axis=1)
             X = X[notnull_indexes]
+            titles = X['titles']
+            links = X['links']
 
         if console_handler.mode == 'train':
             pipeline = Pipeline([
@@ -81,7 +93,14 @@ async def main():
 
         elif console_handler.mode == 'predict':
             model = console_handler.model
-            print('Prediction:', model.predict(X))
+            if console_handler.output:
+                with open(console_handler.output, 'w') as file:
+                    for title, link, author in zip(titles, links, model.predict(X)):
+                        print(author.ljust(20), title.ljust(100), link.ljust(100), file=file)
+            else:
+                print('Predictions'.center(50, '-'))
+                for title, link, author in zip(titles, links, model.predict(X)):
+                    print(author.ljust(20), title.ljust(100), link.ljust(100))
 
 
 if __name__ == '__main__':
