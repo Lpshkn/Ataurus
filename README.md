@@ -173,7 +173,7 @@ sudo docker build -t ataurus:1.1.0 .
   docker run --network=host \
   -v $PWD/result:/ataurus/result \
   ataurus:1.1.0 parse habr orange303,Barrayar,Evgenia_s5,JetHabr,aleks_raiden,tolikmg,Axelus,CooperMaster 8authors \
-  -o 8authors.csv
+  -o /ataurus/result/8authors.csv
   ```
 
 **Произведем обучение модели**:
@@ -181,15 +181,15 @@ sudo docker build -t ataurus:1.1.0 .
   ```shell script
   docker run --network=host \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.1.0 train <hostname>:<port>/<index_name> /ataurus/result/model/<model_name> \
-  -f /ataurus/result/features/<features_name>
+  ataurus:1.1.0 train <hostname>:<port>/<index_name> /ataurus/result/<model_name> \
+  -f /ataurus/result/<features_name>
   ```
   К примеру:
   ```shell
   docker run --network=host \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.1.0 train localhost:9200/8authors /ataurus/result/model/model_8authors \
-  -f /ataurus/result/features/8authors
+  ataurus:1.1.0 train localhost:9200/8authors /ataurus/result/model_8authors \
+  -f /ataurus/result/8authors
   ```
   Здесь для обучения используются данные, полученные из индекса `8authors` ElasticSearch (содержащий тексты 8 авторов). 
   Обработанные тексты сохраняются с помощью опции `-f` с именем `8authors`.
@@ -200,23 +200,23 @@ sudo docker build -t ataurus:1.1.0 .
   docker run \
   -v $PWD/result:/ataurus/result \
   -v <path_to_data>:/ataurus/data \
-  ataurus:1.1.0 train /ataurus/data/<name_.csv_file> /ataurus/result/model/<model_name> \
-  -f /ataurus/result/features/<features_name>
+  ataurus:1.1.0 train /ataurus/result/<name_.csv_file> /ataurus/result/<model_name> \
+  -f /ataurus/result/<features_name>
   ```
   К примеру:
   ```shell
   docker run \
   -v $PWD/result:/ataurus/result \
   -v $PWD/data:/ataurus/data \
-  ataurus:1.1.0 train /ataurus/data/8authors.csv /ataurus/result/model/model_8authors \
-  -f /ataurus/result/features/8authors
+  ataurus:1.1.0 train /ataurus/result/8authors.csv /ataurus/result/model_8authors \
+  -f /ataurus/result/8authors
   ```
   
 * с помощью DataFrame объекта:
   ```shell
   docker run \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.1.0 train /ataurus/result/features/8authors /ataurus/result/model/model_8authors
+  ataurus:1.1.0 train /ataurus/result/8authors /ataurus/result/model_8authors
   ```
   Здесь обучение происходит на уже выделенных ранее признаках и сериализованных в файл `8authors`.
 
@@ -228,7 +228,7 @@ sudo docker build -t ataurus:1.1.0 .
 docker run \
 -v $PWD/result:/ataurus/result \
 -v $PWD/data:/ataurus/data \
-ataurus:1.1.0 predict /ataurus/data/8authors.csv /ataurus/result/model/8authors
+ataurus:1.1.0 predict /ataurus/result/data/8authors.csv /ataurus/result/model/8authors
 ```
 
 ### Настройка параметров обучения

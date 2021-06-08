@@ -7,6 +7,6 @@ RUN pip3 install -r /tmp/requirements.txt
 COPY . /ataurus
 WORKDIR /ataurus
 
-RUN mkdir -p result/features result/model result/data
+RUN mkdir result
 
 ENTRYPOINT ["python3", "./ataurus/main.py"]
