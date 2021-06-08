@@ -1,8 +1,8 @@
-# ATAURUS (Attribution of Authorship Russian)
-
 - [RUSSIAN version](README.md#Описание)
 - [ENGLISH version](README.md#Description)
 
+# ATAURUS (ENG)
+`Attaurus = Attribution of Authorship Russian.  `
 ## Description
 
 The program for recognizing the author of russian texts or articles.
@@ -84,15 +84,16 @@ nosetests --with-coverage --cover-package=ataurus
 ```
 
 ___
-
+# ATAURUS (RUS)
+`Attaurus = Attribution of Authorship Russian.  `
 ## Описание
 
 Программа для атрибуции русских текстов. Для качественной атрибуции, желательно, чтобы на каждого автора приходилось
 60-80 статей.
 
-Программа имеет 2 режима работы: `train` и `predict`
+Программа имеет 3 режима работы: `train`, `predict` и `parse`:
 ```shell
-ataurus {train, predict}
+ataurus {train, predict, parse}
 ```
 * `train` - режим обучения модели на входных данных. На вход подаются полный путь, куда будет сериализована обученная 
   модель (аргумент `output`) и входные данные (аргумент `input`) в следующих возможных форматах:
@@ -119,6 +120,13 @@ ataurus {train, predict}
   
   ```shell
   ataurus predict [-f FEATURES] input model
+  ```
+
+* `parse` - режим для скраппинга вэб-сайтов. В этом режиме необходимо выбрать сайт, для которого написан вэб парсер: 
+  на данный момент это `habr`. Для `habr` необходимо задать через запятую авторов и индекс ElasticSearch, куда будут 
+  сохранены данные:
+  ```shell
+  ataurus parse habr authors index -o <output_csv>
   ```
   
 ## Быстрый старт
@@ -152,23 +160,39 @@ sudo docker build -t ataurus .
 `docker run` опцию `--network=host`. Это позволит подключиться к серверу, запущенному на вашем хосте по адресу 
 `localhost` (если ничего не изменялось).
 
+**Собираем необходимые данные**:
+
+* с помощью задания списка авторов через запятую
+  ```shell
+  docker run --network=host \
+  -v $PWD/result:/ataurus/result \
+  ataurus:1.1.0 parse habr <author1,author2,...,authorN> <index_name> -o <output_csv>
+  ```  
+  К примеру:
+  ```shell
+  docker run --network=host \
+  -v $PWD/result:/ataurus/result \
+  ataurus:1.1.0 parse habr orange303,Barrayar,Evgenia_s5,JetHabr,aleks_raiden,tolikmg,Axelus,CooperMaster 8authors \
+  -o 8authors.csv
+  ```
+
 **Произведем обучение модели**:
 * с помощью connection string
   ```shell script
   docker run --network=host \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.0.0 train <hostname>:<port>/<index_name> /ataurus/result/model/<model_name> \
+  ataurus:1.1.0 train <hostname>:<port>/<index_name> /ataurus/result/model/<model_name> \
   -f /ataurus/result/features/<features_name>
   ```
   К примеру:
   ```shell
   docker run --network=host \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.0.0 train localhost:9200/5ath_18_22 /ataurus/result/model/model_5ath \
-  -f /ataurus/result/features/5ath_18_22
+  ataurus:1.1.0 train localhost:9200/8authors /ataurus/result/model/model_8authors \
+  -f /ataurus/result/features/8authors
   ```
-  Здесь для обучения используются данные, полученные из индекса `5ath_18_22` ElasticSearch (содержащий тексты 5 авторов, 
-  у которых от 18 до 22 текстов). Обработанные тексты сохраняются с помощью опции `-f` с именем `5ath_18_22`.
+  Здесь для обучения используются данные, полученные из индекса `8authors` ElasticSearch (содержащий тексты 8 авторов). 
+  Обработанные тексты сохраняются с помощью опции `-f` с именем `8authors`.
   
 
 * с помощью .csv файла
@@ -176,7 +200,7 @@ sudo docker build -t ataurus .
   docker run \
   -v $PWD/result:/ataurus/result \
   -v <path_to_data>:/ataurus/data \
-  ataurus:1.0.0 train /ataurus/data/<name_.csv_file> /ataurus/result/model/<model_name> \
+  ataurus:1.1.0 train /ataurus/data/<name_.csv_file> /ataurus/result/model/<model_name> \
   -f /ataurus/result/features/<features_name>
   ```
   К примеру:
@@ -184,25 +208,34 @@ sudo docker build -t ataurus .
   docker run \
   -v $PWD/result:/ataurus/result \
   -v $PWD/data:/ataurus/data \
-  ataurus:1.0.0 train /ataurus/data/train1.csv /ataurus/result/model/model_csv \
-  -f /ataurus/result/features/train1
+  ataurus:1.1.0 train /ataurus/data/8authors.csv /ataurus/result/model/model_8authors \
+  -f /ataurus/result/features/8authors
   ```
   
 * с помощью DataFrame объекта:
   ```shell
   docker run \
   -v $PWD/result:/ataurus/result \
-  ataurus:1.0.0 train /ataurus/result/features/5ath_18_22 /ataurus/result/model/model_5ath
+  ataurus:1.1.0 train /ataurus/result/features/8authors /ataurus/result/model/model_8authors
   ```
-  Здесь обучение происходит на уже выделенных ранее признаках и сериализованных в файл `5ath_18_22`.
+  Здесь обучение происходит на уже выделенных ранее признаках и сериализованных в файл `8authors`.
 
 **Произведем предсказание авторов**
 
 Поскольку режим `predict` по синтаксису не отличается практически от режима `train`, то приведем пример только для 
-.csv файла `test1.csv`. При этом, будем использовать обученную модель `model_csv`.
+.csv файла `8authors.csv`. При этом, будем использовать обученную модель `model_8authors`.
 ```shell
 docker run \
 -v $PWD/result:/ataurus/result \
 -v $PWD/data:/ataurus/data \
-ataurus:1.0.0 predict /ataurus/data/test1.csv /ataurus/result/model/model_csv
+ataurus:1.1.0 predict /ataurus/data/8authors.csv /ataurus/result/model/8authors
 ```
+
+### Настройка параметров обучения
+Все доступные настройки параметров содержатся в файле `ataurus/config/train_config.json` в корневой директории. Значения
+ключей **не рекомендуется** изменять, чтобы избежать возможных ошибок. Имеет смысл изменить только значения 
+соответствующих параметров (писать значения можно только в указанные списки).
+
+Существует словарь параметров "по умолчанию", содержащийся в файле `ataurus/ml/grid_search.py`. Этот словарь имеет смысл 
+брать за основу для определения своего конфигурационного файла (но обязательно нужно учитывать формат JSON). Если 
+конфигурационный файл не задан при обучении, то будет использоваться именно этот словарь "по умолчанию".
